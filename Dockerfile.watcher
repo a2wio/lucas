@@ -22,6 +22,9 @@ RUN curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/s
 # Install Claude Code CLI
 RUN npm install -g @anthropic-ai/claude-code
 
+# Create non-root user
+RUN useradd -m -s /bin/bash -u 1000 claude
+
 # Create working directory
 WORKDIR /app
 
@@ -30,12 +33,16 @@ COPY watcher/master-prompt.md /app/master-prompt.md
 COPY watcher/entrypoint.sh /app/entrypoint.sh
 RUN chmod +x /app/entrypoint.sh
 
-# Create directories
-RUN mkdir -p /data /home/claude/.claude
+# Create directories and set permissions
+RUN mkdir -p /data /home/claude/.claude \
+    && chown -R claude:claude /app /data /home/claude
 
 # Set environment defaults
 ENV TARGET_NAMESPACE=default
 ENV SQLITE_PATH=/data/watcher.db
 ENV HOME=/home/claude
+
+# Run as non-root user
+USER claude
 
 ENTRYPOINT ["/app/entrypoint.sh"]
