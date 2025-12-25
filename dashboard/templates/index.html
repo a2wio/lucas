@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clopus Watcher</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    <style>
+        body { font-family: ui-monospace, monospace; }
+    </style>
+</head>
+<body class="bg-white text-black min-h-screen">
+    <div class="max-w-6xl mx-auto px-4 py-8">
+        <!-- Header -->
+        <header class="mb-8">
+            <h1 class="text-2xl font-bold">Clopus Watcher</h1>
+            <p class="text-gray-500 text-sm">Kubernetes Pod Monitor & Auto-Fixer</p>
+        </header>
+
+        <!-- Stats -->
+        <div class="grid grid-cols-4 gap-4 mb-8">
+            <div class="border border-gray-200 p-4">
+                <div class="text-3xl font-bold">{{.Total}}</div>
+                <div class="text-gray-500 text-sm">Total</div>
+            </div>
+            <div class="border border-gray-200 p-4">
+                <div class="text-3xl font-bold">{{.Success}}</div>
+                <div class="text-gray-500 text-sm">Fixed</div>
+            </div>
+            <div class="border border-gray-200 p-4">
+                <div class="text-3xl font-bold">{{.Failed}}</div>
+                <div class="text-gray-500 text-sm">Failed</div>
+            </div>
+            <div class="border border-gray-200 p-4">
+                <div class="text-3xl font-bold">{{.Pending}}</div>
+                <div class="text-gray-500 text-sm">Pending</div>
+            </div>
+        </div>
+
+        <!-- Fixes Table -->
+        <div id="fixes-container" hx-get="/fixes" hx-trigger="every 10s" hx-swap="innerHTML">
+            {{template "fixes-table.html" .}}
+        </div>
+    </div>
+</body>
+</html>

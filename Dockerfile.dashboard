@@ -1,0 +1,37 @@
+# Build stage
+FROM golang:1.22-alpine AS builder
+
+WORKDIR /app
+
+# Copy go mod files
+COPY dashboard/go.mod dashboard/go.sum ./
+RUN go mod download
+
+# Copy source code
+COPY dashboard/ ./
+
+# Build binary
+RUN CGO_ENABLED=1 GOOS=linux go build -o /dashboard main.go
+
+# Runtime stage
+FROM alpine:3.19
+
+RUN apk add --no-cache sqlite-libs
+
+WORKDIR /app
+
+# Copy binary from builder
+COPY --from=builder /dashboard /app/dashboard
+
+# Copy templates
+COPY dashboard/templates /app/templates
+
+# Create data directory
+RUN mkdir -p /data
+
+ENV SQLITE_PATH=/data/watcher.db
+ENV PORT=8080
+
+EXPOSE 8080
+
+CMD ["/app/dashboard"]

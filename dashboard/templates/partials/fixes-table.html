@@ -1,0 +1,47 @@
+{{define "fixes-table.html"}}
+<table class="w-full border-collapse">
+    <thead>
+        <tr class="border-b border-gray-300">
+            <th class="text-left py-2 px-2 text-sm font-medium text-gray-500">Time</th>
+            <th class="text-left py-2 px-2 text-sm font-medium text-gray-500">Namespace</th>
+            <th class="text-left py-2 px-2 text-sm font-medium text-gray-500">Pod</th>
+            <th class="text-left py-2 px-2 text-sm font-medium text-gray-500">Error</th>
+            <th class="text-left py-2 px-2 text-sm font-medium text-gray-500">Fix</th>
+            <th class="text-left py-2 px-2 text-sm font-medium text-gray-500">Status</th>
+        </tr>
+    </thead>
+    <tbody>
+        {{if .Fixes}}
+        {{range .Fixes}}
+        <tr class="border-b border-gray-100 hover:bg-gray-50">
+            <td class="py-2 px-2 text-sm text-gray-600">{{.Timestamp}}</td>
+            <td class="py-2 px-2 text-sm">{{.Namespace}}</td>
+            <td class="py-2 px-2 text-sm font-medium">{{.PodName}}</td>
+            <td class="py-2 px-2 text-sm">
+                <span class="font-medium">{{.ErrorType}}</span>
+                {{if .ErrorMessage}}
+                <span class="text-gray-500 block text-xs truncate max-w-xs" title="{{.ErrorMessage}}">{{.ErrorMessage}}</span>
+                {{end}}
+            </td>
+            <td class="py-2 px-2 text-sm text-gray-600 max-w-xs truncate" title="{{.FixApplied}}">{{.FixApplied}}</td>
+            <td class="py-2 px-2 text-sm">
+                {{if eq .Status "success"}}
+                <span class="inline-block px-2 py-0.5 bg-gray-100 text-black text-xs">OK</span>
+                {{else if eq .Status "failed"}}
+                <span class="inline-block px-2 py-0.5 bg-black text-white text-xs">FAIL</span>
+                {{else}}
+                <span class="inline-block px-2 py-0.5 bg-gray-300 text-gray-700 text-xs">...</span>
+                {{end}}
+            </td>
+        </tr>
+        {{end}}
+        {{else}}
+        <tr>
+            <td colspan="6" class="py-8 text-center text-gray-400">
+                No fixes recorded yet. Watcher runs every 5 minutes.
+            </td>
+        </tr>
+        {{end}}
+    </tbody>
+</table>
+{{end}}
