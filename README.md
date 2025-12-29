@@ -5,6 +5,7 @@ A Kubernetes-native Claude Code watcher that monitors pods, detects errors, and 
 ## Overview
 
 Clopus Watcher runs as a CronJob that:
+
 1. Monitors pods in a target namespace
 2. Detects degraded pods (CrashLoopBackOff, Error, etc.)
 3. Reads logs to understand the error
@@ -73,3 +74,17 @@ kubectl create secret generic claude-credentials \
 # 4. Deploy
 ./scripts/deploy.sh
 ```
+
+## Continuous Integration
+
+### Release Images Workflow
+
+- File: `.github/workflows/build-and-push.yaml`
+- Trigger: any Git tag push or manual `workflow_dispatch`
+- Action: builds both Dockerfiles with Buildx and publishes `clopus-watcher-dashboard` and `clopus-watcher` images to `ghcr.io/<owner>` using the tag name plus a `latest` tag.
+
+### PR Dockerfile Tests
+
+- File: `.github/workflows/pr-docker-tests.yaml`
+- Trigger: pull requests that target `main` (after maintainers approve the run) or manual `workflow_dispatch`
+- Action: rebuilds both Dockerfiles to validate they stay healthy; the job targets the `pr-docker-tests` environment so you can require owner review under *Settings → Environments* to stop untrusted forks from auto-consuming minutes.
