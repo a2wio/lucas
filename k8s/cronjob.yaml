@@ -53,6 +53,13 @@ spec:
                       optional: true
                 # Option 2: Credentials auth (AUTH_MODE=credentials)
                 # Mount credentials.json via volumeMounts below
+                # Slack notifications (optional)
+                - name: SLACK_WEBHOOK_URL
+                  valueFrom:
+                    secretKeyRef:
+                      name: slack-webhook
+                      key: webhook-url
+                      optional: true
               volumeMounts:
                 - name: data
                   mountPath: /data

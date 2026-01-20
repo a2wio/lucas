@@ -170,5 +170,19 @@ WHERE id = $RUN_ID;"
 
 echo "Run #$RUN_ID completed with status: $STATUS"
 
+# === SLACK NOTIFICATION ===
+if [ -n "$SLACK_WEBHOOK_URL" ]; then
+    # Extract summary from report for Slack message
+    SUMMARY=""
+    if [ -n "$REPORT" ]; then
+        SUMMARY=$(echo "$REPORT" | grep -o '"summary"[[:space:]]*:[[:space:]]*"[^"]*"' | sed 's/.*"\([^"]*\)"$/\1/' || echo "")
+    fi
+
+    # Call Slack notification script
+    /app/slack-notify.sh "$STATUS" "$TARGET_NAMESPACE" "$RUN_ID" "$POD_COUNT" "$ERROR_COUNT" "$FIX_COUNT" "$SUMMARY" || echo "Slack notification failed (non-fatal)"
+else
+    echo "Slack notifications disabled (SLACK_WEBHOOK_URL not set)"
+fi
+
 # Cleanup
 rm -f "$OUTPUT_FILE"

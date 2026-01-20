@@ -32,7 +32,8 @@ WORKDIR /app
 COPY watcher/master-prompt-autonomous.md /app/master-prompt-autonomous.md
 COPY watcher/master-prompt-report.md /app/master-prompt-report.md
 COPY watcher/entrypoint.sh /app/entrypoint.sh
-RUN chmod +x /app/entrypoint.sh
+COPY watcher/slack-notify.sh /app/slack-notify.sh
+RUN chmod +x /app/entrypoint.sh /app/slack-notify.sh
 
 # Create directories and set permissions
 RUN mkdir -p /data /home/claude/.claude \
