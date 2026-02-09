@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A2W: Lucas</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css"
+        integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="icon" type="image/png" href="/assets/img/logo/dark.png">
+    <style>
+        * {
+            font-family: "Inter", sans-serif;
+        }
+        .font-mono {
+            font-family: "JetBrains Mono", monospace;
+        }
+        /* Scrollbar */
+        .scrollbar-thin::-webkit-scrollbar { width: 6px; }
+        .scrollbar-thin::-webkit-scrollbar-track { background: #f5f5f5; }
+        .scrollbar-thin::-webkit-scrollbar-thumb { background: #d4d4d4; border-radius: 3px; }
+        .scrollbar-thin::-webkit-scrollbar-thumb:hover { background: #a3a3a3; }
+        /* Nav links */
+        .nav-link:hover { background: #f5f5f5; }
+        .nav-link.active { background: #f5f5f5; border-left-color: #10b981; }
+    </style>
+</head>
+<body class="bg-neutral-100 text-neutral-900 min-h-screen">
+    <div class="flex h-screen">
+        <!-- Sidebar -->
+        <aside class="w-56 bg-white border-r border-neutral-300 flex flex-col">
+            <!-- Logo -->
+            <div class="p-4 border-b border-neutral-300">
+                <img src="/assets/img/logo/dark.png" alt="A2W" class="h-8">
+            </div>
+
+            <!-- Navigation -->
+            <nav class="flex-1 p-3 space-y-1">
+                <a href="/" class="nav-link flex items-center gap-3 px-3 py-2 rounded-lg text-sm border-l-2 border-transparent {{if eq .Page "overview"}}active{{end}}">
+                    <i class="fa-solid fa-grid-2 w-5 text-neutral-500"></i>
+                    <span>Overview</span>
+                </a>
+                <a href="/sessions" class="nav-link flex items-center gap-3 px-3 py-2 rounded-lg text-sm border-l-2 border-transparent {{if eq .Page "sessions"}}active{{end}}">
+                    <i class="fa-solid fa-comments w-5 text-neutral-500"></i>
+                    <span>Sessions</span>
+                </a>
+                <a href="/costs" class="nav-link flex items-center gap-3 px-3 py-2 rounded-lg text-sm border-l-2 border-transparent {{if eq .Page "costs"}}active{{end}}">
+                    <i class="fa-solid fa-dollar-sign w-5 text-neutral-500"></i>
+                    <span>Costs</span>
+                </a>
+                <a href="/runbooks" class="nav-link flex items-center gap-3 px-3 py-2 rounded-lg text-sm border-l-2 border-transparent {{if eq .Page "runbooks"}}active{{end}}">
+                    <i class="fa-solid fa-book w-5 text-neutral-500"></i>
+                    <span>Runbooks</span>
+                </a>
+            </nav>
+
+            <!-- Namespace Selector -->
+            <div class="p-3 border-t border-neutral-300">
+                <label class="text-xs text-neutral-500 uppercase tracking-wider mb-2 block">Namespace</label>
+                <select id="ns-select"
+                        class="w-full bg-white border border-neutral-300 rounded px-3 py-2 text-sm focus:outline-none focus:border-neutral-500"
+                        onchange="updateNamespace(this.value)">
+                    {{if not .Namespaces}}
+                    <option value="">No namespaces yet</option>
+                    {{else}}
+                    {{range .Namespaces}}
+                    <option value="{{.Namespace}}" {{if eq $.CurrentNS .Namespace}}selected{{end}}>{{.Namespace}}</option>
+                    {{end}}
+                    {{end}}
+                </select>
+            </div>
+
+            <!-- Stats Footer -->
+            {{if .Stats}}
+            <div class="p-3 border-t border-neutral-300 text-xs">
+                <div class="grid grid-cols-2 gap-2">
+                    <div class="bg-neutral-100 rounded p-2">
+                        <div class="text-neutral-500">Runs</div>
+                        <div class="font-mono text-lg text-neutral-900">{{.Stats.RunCount}}</div>
+                    </div>
+                    <div class="bg-neutral-100 rounded p-2">
+                        <div class="text-neutral-500">OK</div>
+                        <div class="font-mono text-lg text-emerald-600">{{.Stats.OkCount}}</div>
+                    </div>
+                    <div class="bg-neutral-100 rounded p-2">
+                        <div class="text-neutral-500">Fixed</div>
+                        <div class="font-mono text-lg text-amber-600">{{.Stats.FixedCount}}</div>
+                    </div>
+                    <div class="bg-neutral-100 rounded p-2">
+                        <div class="text-neutral-500">Failed</div>
+                        <div class="font-mono text-lg text-red-600">{{.Stats.FailedCount}}</div>
+                    </div>
+                </div>
+            </div>
+            {{end}}
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 flex flex-col min-w-0 overflow-hidden">
+            {{if eq .Page "overview"}}
+            {{template "page-overview.html" .}}
+            {{else if eq .Page "sessions"}}
+            {{template "page-sessions.html" .}}
+            {{else if eq .Page "costs"}}
+            {{template "page-costs.html" .}}
+            {{else if eq .Page "runbooks"}}
+            {{template "page-runbooks.html" .}}
+            {{else}}
+            {{template "page-overview.html" .}}
+            {{end}}
+        </main>
+    </div>
+
+    <script>
+        function updateNamespace(ns) {
+            const url = new URL(window.location);
+            url.searchParams.set('ns', ns);
+            window.location.href = url.toString();
+        }
+
+        function toggleLog() {
+            const panel = document.getElementById('log-panel');
+            const chevron = document.getElementById('log-chevron');
+            if (panel && chevron) {
+                panel.classList.toggle('hidden');
+                chevron.classList.toggle('rotate-180');
+            }
+        }
+
+        function deleteSession(sessionId) {
+            if (!confirm('Delete this session? The agent will create a new one on next interaction.')) {
+                return;
+            }
+            fetch('/api/session?id=' + encodeURIComponent(sessionId), {
+                method: 'DELETE'
+            }).then(response => {
+                if (response.ok) {
+                    window.location.reload();
+                } else {
+                    alert('Failed to delete session');
+                }
+            }).catch(err => {
+                alert('Error: ' + err);
+            });
+        }
+
+        // Auto-scroll log
+        const logContainer = document.getElementById('live-log');
+        if (logContainer) {
+            new MutationObserver(() => {
+                logContainer.scrollTop = logContainer.scrollHeight;
+            }).observe(logContainer, { childList: true });
+        }
+    </script>
+</body>
+</html>

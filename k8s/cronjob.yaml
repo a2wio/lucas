@@ -1,8 +1,8 @@
 apiVersion: batch/v1
 kind: CronJob
 metadata:
-  name: clopus-watcher
-  namespace: clopus-watcher
+  name: a2w-lucas
+  namespace: a2w-lucas
 spec:
   schedule: "*/5 * * * *"  # Every 5 minutes
   concurrencyPolicy: Forbid  # Don't run if previous job still running
@@ -14,7 +14,7 @@ spec:
       ttlSecondsAfterFinished: 300  # Clean up after 5 minutes
       template:
         spec:
-          serviceAccountName: clopus-watcher
+          serviceAccountName: a2w-lucas
           restartPolicy: Never
           # Uncomment if using private registry:
           # imagePullSecrets:
@@ -29,16 +29,16 @@ spec:
               securityContext:
                 runAsUser: 0
           containers:
-            - name: watcher
-              image: ghcr.io/kubeden/clopus-watcher:latest
+            - name: lucas
+              image: ghcr.io/a2wio/lucas:latest
               imagePullPolicy: Always
               env:
                 - name: TARGET_NAMESPACE
                   value: "default"  # Namespace to monitor
-                - name: WATCHER_MODE
+                - name: SRE_MODE
                   value: "autonomous"  # "autonomous" (fix issues) or "report" (report only)
                 - name: SQLITE_PATH
-                  value: "/data/watcher.db"
+                  value: "/data/lucas.db"
                 - name: HOME
                   value: "/home/claude"
                 # AUTH_MODE: "api-key" (default) or "credentials"
@@ -77,7 +77,7 @@ spec:
           volumes:
             - name: data
               persistentVolumeClaim:
-                claimName: watcher-data
+                claimName: lucas-data
             # Uncomment for AUTH_MODE=credentials:
             # - name: claude-credentials
             #   secret:

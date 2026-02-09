@@ -1,0 +1,71 @@
+FROM ubuntu:24.04
+
+# Install dependencies
+RUN apt-get update && apt-get install -y \
+    curl \
+    git \
+    sqlite3 \
+    ca-certificates \
+    gnupg \
+    python3 \
+    python3-pip \
+    python3-venv \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Node.js (required for Claude Code)
+RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
+    && apt-get install -y nodejs \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install kubectl
+RUN curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl" \
+    && install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl \
+    && rm kubectl
+
+# Install Claude Code CLI
+RUN npm install -g @anthropic-ai/claude-code
+
+# Create non-root user
+RUN useradd -m -s /bin/bash claude
+
+# Create working directory
+WORKDIR /app
+
+# Create virtual environment and install Python dependencies
+COPY src/agent/main/requirements.txt /app/requirements.txt
+RUN python3 -m venv /app/venv \
+    && /app/venv/bin/pip install --no-cache-dir -r requirements.txt
+
+# Copy agent Python files
+COPY src/agent/main/*.py /app/
+
+# Copy master prompts
+COPY src/agent/entrypoint/master-prompt-interactive.md /app/master-prompt-interactive.md
+COPY src/agent/entrypoint/master-prompt-interactive-report.md /app/master-prompt-interactive-report.md
+COPY src/agent/entrypoint/master-prompt-autonomous.md /app/master-prompt-autonomous.md
+COPY src/agent/entrypoint/master-prompt-report.md /app/master-prompt-report.md
+
+# Copy runbooks
+COPY src/agent/runbooks/ /runbooks/
+
+# Copy Claude Code skills
+COPY src/agent/.claude/skills/ /home/claude/.claude/skills/
+
+# Create directories and set permissions
+RUN mkdir -p /data /home/claude/.claude/skills \
+    && chown -R claude:claude /app /data /home/claude /runbooks
+
+# Set environment defaults
+ENV TARGET_NAMESPACE=default
+ENV TARGET_NAMESPACES=default
+ENV SQLITE_PATH=/data/lucas.db
+ENV HOME=/home/claude
+ENV PATH="/app/venv/bin:$PATH"
+ENV PROMPT_FILE=/app/master-prompt-interactive.md
+ENV SCAN_INTERVAL_SECONDS=300
+
+# Run as non-root user
+USER claude
+
+# Run the interactive agent
+CMD ["python3", "main.py"]

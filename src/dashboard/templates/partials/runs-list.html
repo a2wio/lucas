@@ -1,0 +1,41 @@
+{{define "runs-list.html"}}
+{{if .Runs}}
+<div class="divide-y divide-neutral-200">
+    {{range .Runs}}
+    <a href="/?ns={{.Namespace}}&run={{.ID}}"
+       class="block px-3 py-3 hover:bg-neutral-100 transition-colors">
+        <div class="flex items-center justify-between mb-1">
+            <span class="text-sm font-medium text-neutral-900">Run #{{.ID}}</span>
+            {{if eq .Status "ok"}}
+            <span class="w-2 h-2 bg-emerald-500 rounded-full"></span>
+            {{else if eq .Status "fixed"}}
+            <span class="w-2 h-2 bg-amber-500 rounded-full"></span>
+            {{else if eq .Status "failed"}}
+            <span class="w-2 h-2 bg-red-500 rounded-full"></span>
+            {{else if eq .Status "issues_found"}}
+            <span class="w-2 h-2 bg-orange-500 rounded-full"></span>
+            {{else}}
+            <span class="w-2 h-2 bg-neutral-400 rounded-full"></span>
+            {{end}}
+        </div>
+        <div class="text-xs text-neutral-500">
+            {{.StartedAt}}
+        </div>
+        <div class="flex items-center gap-2 mt-1 text-xs">
+            <span class="text-neutral-500">{{.Mode}}</span>
+            {{if gt .ErrorCount 0}}
+            <span class="text-red-600">{{.ErrorCount}} errors</span>
+            {{end}}
+            {{if gt .FixCount 0}}
+            <span class="text-emerald-600">{{.FixCount}} fixed</span>
+            {{end}}
+        </div>
+    </a>
+    {{end}}
+</div>
+{{else}}
+<div class="p-4 text-center text-neutral-500 text-sm">
+    No runs yet
+</div>
+{{end}}
+{{end}}

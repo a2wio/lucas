@@ -1,0 +1,889 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>a2w</title>
+    <link rel="icon" type="image/png" href="/assets/img/logo/dark.png">
+    <link rel="apple-touch-icon" href="/assets/img/logo/dark.png">
+
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap"
+        rel="stylesheet">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css"
+        integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+    <style>
+        * {
+            font-family: "Inter", sans-serif;
+        }
+
+        .terminal {
+            font-family: "Berkeley Mono", "SF Mono", "Monaco", "Inconsolata", "Fira Mono", "Droid Sans Mono", "Source Code Pro", monospace;
+        }
+
+        /* Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.5;
+            }
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .animate-fade-in {
+            animation: fadeInUp 0.6s ease-out forwards;
+        }
+
+        .animate-fade-in-delay-1 {
+            animation: fadeInUp 0.6s ease-out 0.1s forwards;
+            opacity: 0;
+        }
+
+        .animate-fade-in-delay-2 {
+            animation: fadeInUp 0.6s ease-out 0.2s forwards;
+            opacity: 0;
+        }
+
+        .animate-fade-in-delay-3 {
+            animation: fadeInUp 0.6s ease-out 0.3s forwards;
+            opacity: 0;
+        }
+
+        .animate-pulse-slow {
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        .animate-slide-in {
+            animation: slideIn 0.4s ease-out forwards;
+        }
+
+        /* Feature badge hover */
+        .feature-badge {
+            transition: all 0.2s ease;
+        }
+
+        .feature-badge:hover {
+            background-color: #171717;
+            color: white;
+            transform: translateY(-1px);
+        }
+
+        /* Install command */
+        .install-cmd {
+            transition: all 0.2s ease;
+        }
+
+        .install-cmd:hover {
+            background-color: #1f1f1f;
+        }
+
+        /* Typing cursor */
+        .typing-cursor::after {
+            content: '▊';
+            animation: pulse 1s ease-in-out infinite;
+        }
+
+        /* Activity dot pulse */
+        .activity-dot {
+            animation: pulse 2s ease-in-out infinite;
+        }
+    </style>
+    <script src="/js/chat.js" defer></script>
+</head>
+
+<body class="bg-neutral-100 h-screen flex flex-col overflow-hidden">
+
+    <main class="flex-1 flex flex-col overflow-hidden">
+
+        <!-- Announcement Bar -->
+        <div
+            class="bg-gradient-to-r from-blue-600 to-blue-500 text-white py-1.5 px-3 sm:px-4 shrink-0 text-xs text-center">
+            <span class="inline-flex items-center gap-1 sm:gap-2 flex-wrap justify-center">
+                <span class="font-medium">New:</span> <span class="hidden sm:inline">Lucas</span> v0.1.0 <span
+                    class="hidden sm:inline">is now available</span> — <a href="https://github.com/a2wio/lucas"
+                    target="_blank" class="underline hover:text-blue-100 transition-colors">GitHub →</a>
+            </span>
+        </div>
+
+        <!-- Navbar -->
+        <nav class="px-4 sm:px-2 py-2 w-full sticky top-0 bg-neutral-100 z-50 border-b border-neutral-300">
+            <section class="flex flex-row justify-between items-center">
+                <div class="flex items-center gap-4 sm:gap-6">
+                    <a href="#">
+                        <img src="/assets/img/logo/dark.png" class="w-8 sm:w-9 rounded-md" alt="a2w logo">
+                    </a>
+                    <div class="hidden sm:flex flex-row items-center gap-x-6 text-neutral-900 text-sm">
+                        <a class="hover:text-neutral-600 transition-colors" href="#agents">Agents</a>
+                        <a class="hover:text-neutral-600 transition-colors" href="#newsletter">Documentation</a>
+                        <a class="hover:text-neutral-600 transition-colors" href="#newsletter">Newsletter</a>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2 sm:gap-4">
+                    <!-- Mobile terminal toggle -->
+                    <button onclick="toggleMobileTerminal()" id="mobile-terminal-toggle"
+                        class="lg:hidden p-2 text-neutral-500 hover:text-neutral-900 transition-colors"
+                        title="Chat with Lucas">
+                        <i class="fa-solid fa-terminal text-lg"></i>
+                    </button>
+                    <!-- Desktop subscribe form -->
+                    <form class="hidden md:flex items-center gap-2">
+                        <input type="email" placeholder="stay@updated-on-our-releases.com"
+                            class="px-3 py-2.5 rounded-md border border-neutral-300 text-xs w-74 focus:outline-none focus:border-neutral-500">
+                        <button type="submit"
+                            class="px-3 py-2.5 bg-neutral-900 text-white rounded-md text-xs font-medium hover:bg-neutral-800 transition-colors">
+                            Subscribe
+                        </button>
+                    </form>
+                    <!-- Desktop terminal toggle -->
+                    <button onclick="toggleTerminal()" id="terminal-toggle"
+                        class="hidden lg:block p-2 text-neutral-500 hover:text-neutral-900 transition-colors"
+                        title="Toggle terminal">
+                        <i class="fa-solid fa-terminal text-lg"></i>
+                    </button>
+                </div>
+            </section>
+        </nav>
+
+        <div id="main-container" class="flex flex-col lg:flex-row flex-1 overflow-hidden">
+            <!-- Left: Content -->
+            <div id="content-panel"
+                class="w-full lg:border-e border-neutral-200 flex flex-col overflow-hidden transition-all duration-500 ease-in-out lg:w-[66.667%]">
+                <div class="px-4 sm:px-8 pb-5 flex-1 overflow-y-auto">
+                    <h2 class="text-3xl md:text-4xl  animate-fade-in pt-6 sm:pt-8"><span class="font-bold">A2W</span>
+                        <span class="italic">stands for</span> <span class="font-bold">Autonomous Twins</span>
+                    </h2>
+                    <hr class="my-4 text-neutral-300 animate-fade-in-delay-1">
+                    <p class="max-w-2xl">An autonomous twin is an AI agent that executes a process that a human would
+                        otherwise execute —
+                        but it runs 24/7, costs less, and never complains.</p>
+                    <div
+                        class="flex flex-row items-center justify-between gap-3 py-3 sticky top-0 bg-neutral-100 z-10 border-b border-neutral-300 -mx-8 px-8 mt-8">
+                        <a href="https://github.com/a2wio/lucas"
+                            class="flex items-center gap-2 text-neutral-700 transition-colors">
+                            <i class="fa-brands fa-github text-base"></i>
+                            <span class="text-sm font-medium">a2w/lucas</span>
+                            <div class="flex flex-row text-xs leading-tight gap-x-2 ps-2">
+                                <span class="flex items-center gap-0.5"><i
+                                        class="fa-solid fa-star text-yellow-500 text-[10px]"></i> 270</span>
+                                <span class="flex items-center gap-0.5"><i
+                                        class="fa-solid fa-code-fork text-neutral-400 text-[10px]"></i> 40</span>
+                                <span class="ps-2 text-neutral-300 hidden sm:inline">|</span>
+                                <span class="ps-2 hidden sm:inline">The Agent</span>
+                            </div>
+                        </a>
+                        <div class="flex items-center gap-2">
+                            <a href="#"
+                                class="px-3 py-1.5 text-xs sm:text-sm border border-neutral-300 rounded-md hover:bg-neutral-200 transition-colors">Docs</a>
+                            <button onclick="document.getElementById('demo-modal').classList.remove('hidden')"
+                                class="px-3 py-1.5 text-xs sm:text-sm bg-neutral-900 text-white rounded-md hover:bg-neutral-800 transition-colors">Demo</button>
+                        </div>
+                    </div>
+
+                    <!-- Lucas: Agent -->
+                    <div class="mt-3">
+                        <h4 class="text-xl flex items-center gap-3">
+                            <span><span class="font-semibold">Lucas:</span> A Site Reliability Engineer</span>
+                        </h4>
+                        <p class="mt-2 text-neutral-600">A 24/7-running agent that lives in your Kubernetes cluster. It
+                            monitors, debugs, and resolves incidents autonomously.</p>
+
+                        <!-- Features -->
+                        <div class="flex flex-wrap gap-2 mt-4">
+                            <span
+                                class="feature-badge px-2 py-1 text-xs bg-neutral-200 text-neutral-700 rounded cursor-default">Dashboard</span>
+                            <span
+                                class="feature-badge px-2 py-1 text-xs bg-neutral-200 text-neutral-700 rounded cursor-default">Runbooks</span>
+                            <span
+                                class="feature-badge px-2 py-1 text-xs bg-neutral-200 text-neutral-700 rounded cursor-default">Cost
+                                Tracking</span>
+                            <span
+                                class="feature-badge px-2 py-1 text-xs bg-neutral-200 text-neutral-700 rounded cursor-default">Highly
+                                Customizable</span>
+                            <span
+                                class="feature-badge px-2 py-1 text-xs bg-neutral-200 text-neutral-700 rounded cursor-default">Open-Source</span>
+                            <span
+                                class="feature-badge px-2 py-1 text-xs bg-neutral-200 text-neutral-700 rounded cursor-default">GitOps-Ready</span>
+                        </div>
+
+                        <!-- Quick Install -->
+                        <div class="mt-6 max-w-xl">
+                            <p class="text-xs text-neutral-500 mb-2">Quick install:</p>
+                            <div
+                                class="install-cmd flex items-center justify-between bg-neutral-900 text-neutral-100 rounded-md px-3 sm:px-4 py-3 font-mono text-xs sm:text-sm overflow-x-auto">
+                                <code class="whitespace-nowrap">helm install lucas a2w/lucas --namespace a2w</code>
+                                <button onclick="copyInstallCmd()" id="copy-btn"
+                                    class="text-neutral-400 hover:text-white transition-colors ml-4 shrink-0">
+                                    <i class="fa-regular fa-copy"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Integrations -->
+                        <div class="mt-6">
+                            <p class="text-xs text-neutral-500 mb-3">Works with:</p>
+                            <div class="flex flex-wrap items-center gap-3 sm:gap-4 text-neutral-400">
+                                <span class="flex items-center gap-1.5 text-xs sm:text-sm"><i
+                                        class="fa-brands fa-docker"></i>
+                                    Docker</span>
+                                <span class="flex items-center gap-1.5 text-xs sm:text-sm"><i
+                                        class="fa-solid fa-dharmachakra"></i>
+                                    K8s</span>
+                                <span class="flex items-center gap-1.5 text-xs sm:text-sm"><i
+                                        class="fa-brands fa-aws"></i>
+                                    AWS</span>
+                                <span class="flex items-center gap-1.5 text-xs sm:text-sm"><i
+                                        class="fa-brands fa-google"></i>
+                                    GCP</span>
+                                <span class="flex items-center gap-1.5 text-xs sm:text-sm"><i
+                                        class="fa-brands fa-microsoft"></i>
+                                    Azure</span>
+                                <span class="flex items-center gap-1.5 text-xs sm:text-sm"><i
+                                        class="fa-solid fa-fire"></i>
+                                    Prometheus</span>
+                                <span class="flex items-center gap-1.5 text-xs sm:text-sm"><i
+                                        class="fa-brands fa-slack"></i>
+                                    Slack</span>
+                            </div>
+                            <p class="mt-3 text-xs text-neutral-500 flex items-center gap-2">
+                                Works best with ArgoCD <img
+                                    src="https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/webp/argo-cd.webp"
+                                    alt="ArgoCD" class="w-4 h-4">
+                            </p>
+                        </div>
+
+                        <div class="flex flex-wrap items-center gap-2 mt-4 text-xs sm:text-sm">
+                            <span class="text-neutral-500 flex items-center gap-1"><i
+                                    class="fab text-neutral-600 fa-github"></i></span>
+                            <a href="#" class="underline hover:text-neutral-600">GitHub</a>
+                            <span class="text-neutral-500 flex items-center gap-1">· <i
+                                    class="fa-solid text-yellow-500 fa-star"></i> 270</span>
+                            <span class="text-neutral-500 flex items-center gap-1">· <i
+                                    class="fa-solid text-neutral-600 fa-code-fork"></i> 40</span>
+                            <span class="text-neutral-300 hidden sm:inline">|</span>
+                            <a href="#" class="underline hover:text-neutral-600 hidden sm:inline">Documentation</a>
+                            <span class="text-neutral-300 hidden sm:inline">|</span>
+                            <button onclick="document.getElementById('demo-modal').classList.remove('hidden')"
+                                class="underline hover:text-neutral-600 hidden sm:inline">View Demo</button>
+                        </div>
+                    </div>
+
+                    <!-- Screenshots -->
+                    <div class="mt-8 pt-6 border-t border-neutral-200">
+                        <p class="text-xs text-neutral-500 mb-4">Screenshots:</p>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div
+                                class="aspect-video bg-neutral-200 rounded-lg flex items-center justify-center text-neutral-400 text-sm border border-neutral-300 hover:border-neutral-400 transition-colors cursor-pointer">
+                                <div class="text-center">
+                                    <i class="fa-solid fa-image text-2xl mb-2"></i>
+                                    <p class="text-xs">Dashboard</p>
+                                </div>
+                            </div>
+                            <div
+                                class="aspect-video bg-neutral-200 rounded-lg flex items-center justify-center text-neutral-400 text-sm border border-neutral-300 hover:border-neutral-400 transition-colors cursor-pointer">
+                                <div class="text-center">
+                                    <i class="fa-solid fa-image text-2xl mb-2"></i>
+                                    <p class="text-xs">Incident View</p>
+                                </div>
+                            </div>
+                            <div
+                                class="aspect-video bg-neutral-200 rounded-lg flex items-center justify-center text-neutral-400 text-sm border border-neutral-300 hover:border-neutral-400 transition-colors cursor-pointer">
+                                <div class="text-center">
+                                    <i class="fa-solid fa-image text-2xl mb-2"></i>
+                                    <p class="text-xs">Runbooks</p>
+                                </div>
+                            </div>
+                            <div
+                                class="aspect-video bg-neutral-200 rounded-lg flex items-center justify-center text-neutral-400 text-sm border border-neutral-300 hover:border-neutral-400 transition-colors cursor-pointer">
+                                <div class="text-center">
+                                    <i class="fa-solid fa-image text-2xl mb-2"></i>
+                                    <p class="text-xs">Cost Tracking</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Testimonials -->
+                    <div class="mt-6 pt-6 border-t border-neutral-200">
+                        <p class="text-xs text-neutral-500 mb-3">What people are saying:</p>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div class="relative bg-neutral-50 rounded-lg p-4 pl-5 border-l-2 border-neutral-900">
+                                <i class="fa-solid fa-quote-left absolute top-3 right-3 text-neutral-200 text-lg"></i>
+                                <p class="text-neutral-700 text-sm leading-relaxed">Lucas cut our incident response
+                                    time by <span class="font-semibold">70%</span>. It's like having a senior engineer
+                                    who never sleeps.</p>
+                                <div class="mt-4 flex items-center gap-3">
+                                    <div
+                                        class="w-9 h-9 bg-gradient-to-br from-blue-400 to-blue-600 rounded-full flex items-center justify-center text-white text-xs font-medium">
+                                        SC</div>
+                                    <div>
+                                        <p class="text-sm font-medium">Sarah Chen</p>
+                                        <p class="text-xs text-neutral-500">Platform Lead · Acme Corp</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="relative bg-neutral-50 rounded-lg p-4 pl-5 border-l-2 border-neutral-900">
+                                <i class="fa-solid fa-quote-left absolute top-3 right-3 text-neutral-200 text-lg"></i>
+                                <p class="text-neutral-700 text-sm leading-relaxed">We deployed Lucas on Friday and
+                                    it resolved <span class="font-semibold">3 incidents</span> over the weekend
+                                    without paging anyone.</p>
+                                <div class="mt-4 flex items-center gap-3">
+                                    <div
+                                        class="w-9 h-9 bg-gradient-to-br from-emerald-400 to-emerald-600 rounded-full flex items-center justify-center text-white text-xs font-medium">
+                                        MJ</div>
+                                    <div>
+                                        <p class="text-sm font-medium">Marcus Johnson</p>
+                                        <p class="text-xs text-neutral-500">Engineering Manager · TechStart</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <!-- Stay Updated, Resources & Contacts -->
+                    <div class="mt-8 pt-6 border-t border-neutral-200">
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 md:gap-8">
+                            <!-- Stay Updated -->
+                            <div class="md:col-span-2">
+                                <h3 class="text-lg sm:text-xl font-semibold">Stay updated</h3>
+                                <p class="mt-2 text-neutral-600 text-sm">Get notified about new releases.</p>
+                                <form class="flex flex-col gap-2 mt-4">
+                                    <input type="email" placeholder="you@company.com"
+                                        class="px-4 py-2.5 border border-neutral-300 rounded-md bg-white text-sm focus:outline-none focus:border-neutral-500">
+                                    <button type="submit"
+                                        class="px-5 py-2.5 bg-neutral-900 text-white rounded-md text-sm font-medium hover:bg-neutral-800 transition-colors">
+                                        Subscribe
+                                    </button>
+                                </form>
+                                <p class="mt-2 text-xs text-neutral-400">No spam, unsubscribe anytime.</p>
+                            </div>
+                            <div class="flex flex-col w-full md:col-span-2">
+                                <!-- Resources -->
+                                <div class="w-full flex flex-col">
+                                    <h3 class="text-lg sm:text-xl font-semibold">Resources</h3>
+                                    <div class="flex flex-row flex-wrap mt-3 gap-x-4 gap-y-2 w-full">
+                                        <a href="#"
+                                            class="text-sm text-neutral-600 hover:text-neutral-900 underline transition-colors">Documentation</a>
+                                        <a href="#"
+                                            class="text-sm text-neutral-600 hover:text-neutral-900 underline transition-colors">Video</a>
+                                        <a href="#"
+                                            class="text-sm text-neutral-600 hover:text-neutral-900 underline transition-colors">Changelog</a>
+                                        <a href="https://github.com/a2wio"
+                                            class="text-sm text-neutral-600 hover:text-neutral-900 underline transition-colors">GitHub</a>
+                                    </div>
+                                </div>
+                                <!-- Contacts -->
+                                <div class="w-full flex flex-col mt-6">
+                                    <h3 class="text-lg sm:text-xl font-semibold">Contacts</h3>
+                                    <div class="mt-3 flex flex-row flex-wrap gap-x-4 gap-y-2 w-full">
+                                        <a href="mailto:dennis@a2w.io"
+                                            class="text-sm text-neutral-600 hover:text-neutral-900 underline transition-colors">Email</a>
+                                        <a href="https://x.com/a2wdotio"
+                                            class="text-sm text-neutral-600 hover:text-neutral-900 underline transition-colors">X/Twitter</a>
+                                        <a href="https://linkedin.com/company/a2wio"
+                                            class="text-sm text-neutral-600 hover:text-neutral-900 underline transition-colors">LinkedIn</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Footer -->
+                <div class="px-4 sm:px-8 py-4 border-t border-neutral-200 text-xs sm:text-sm text-neutral-500 shrink-0">
+                    <div class="flex flex-col sm:flex-row justify-between items-center gap-3">
+                        <div class="flex items-center gap-3">
+                            <span>© 2026 a2w</span>
+                            <a href="#" class="hover:text-neutral-900 transition-colors"><i
+                                    class="fa-brands fa-github"></i></a>
+                            <a href="#" class="hover:text-neutral-900 transition-colors"><i
+                                    class="fa-brands fa-x-twitter"></i></a>
+                            <a href="#" class="hover:text-neutral-900 transition-colors"><i
+                                    class="fa-solid fa-envelope"></i></a>
+                        </div>
+                        <div class="flex flex-wrap items-center justify-center gap-x-3 gap-y-1">
+                            <a href="/terms.html" class="hover:text-neutral-900 transition-colors">Terms</a>
+                            <a href="/privacy.html" class="hover:text-neutral-900 transition-colors">Privacy</a>
+                            <button onclick="document.getElementById('cookie-banner').classList.remove('hidden')"
+                                class="hover:text-neutral-900 transition-colors">Cookies</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right: Claude Code Terminal -->
+            <div id="terminal-panel"
+                class="hidden lg:flex bg-neutral-900 text-neutral-100 terminal text-sm p-6 flex-col overflow-hidden transition-all duration-500 ease-in-out lg:w-[33.333%]"
+                style="opacity: 1;">
+                <!-- Terminal Header -->
+                <div class="flex items-center gap-2 text-neutral-500 text-xs border-b border-neutral-700 pb-4 mb-4">
+                    <span>───</span>
+                    <span class="shrink-0">Lucas v0.1.0</span>
+                    <span
+                        class="flex-1 overflow-hidden">────────────────────────────────────────────────────────────────────────────────────────────────────────</span>
+                </div>
+
+                <!-- Welcome Box -->
+                <div class="flex gap-8 mb-6 animate-slide-in">
+                    <div class="text-center">
+                        <pre class="text-neutral-400 text-xs leading-tight">
+   ▄▄▄▄▄
+  ██▀▀▀██
+  ██   ██
+  ██▄▄▄██
+   ▀▀▀▀▀
+                        </pre>
+                        <p class="text-neutral-300 mt-2">Welcome!</p>
+                        <p class="text-neutral-500 text-xs mt-1">lucas · a2w lucas</p>
+                        <p class="text-neutral-600 text-xs">~/your-cluster</p>
+                    </div>
+                    <div class="text-xs">
+                        <p class="text-neutral-400 mb-2">Tips for getting started</p>
+                        <p class="text-neutral-500">Run <span class="text-amber-500">/deploy</span> to install Lucas in
+                            your cluster</p>
+                        <p class="text-neutral-600 mt-3">────────────────────────────</p>
+                        <p class="text-neutral-400 mt-3 mb-2 flex items-center gap-2">
+                            <span class="activity-dot w-2 h-2 bg-green-500 rounded-full inline-block"></span>
+                            Recent activity
+                        </p>
+                        <p class="text-neutral-500"><span class="text-neutral-600">2m ago</span> <span
+                                class="text-green-400">✓</span> Detected memory leak in
+                            pod api-7d4b</p>
+                        <p class="text-neutral-500"><span class="text-neutral-600">5m ago</span> <span
+                                class="text-blue-400">↑</span> Auto-scaled deployment
+                            to 3 replicas</p>
+                        <p class="text-neutral-500"><span class="text-neutral-600">12m ago</span> <span
+                                class="text-green-400">✓</span> Resolved certificate
+                            expiry warning</p>
+                    </div>
+                </div>
+
+                <div class="border-t border-neutral-700 my-4"></div>
+
+                <!-- Chat -->
+                <div id="chat-messages" class="flex-1 flex flex-col gap-4 text-xs overflow-y-auto">
+                    <div>
+                        <p class="text-neutral-500 mb-1">You</p>
+                        <p class="text-neutral-300">hey lucas, what's the status of the cluster?</p>
+                    </div>
+                    <div>
+                        <p class="text-amber-500 mb-1">Lucas</p>
+                        <p class="text-neutral-300">All systems operational. Currently monitoring:</p>
+                        <div class="text-neutral-400 mt-2 pl-2">
+                            <p>• 12 pods running across 3 nodes</p>
+                            <p>• CPU usage: 34% avg</p>
+                            <p>• Memory: 2.1GB / 8GB</p>
+                            <p>• No active incidents</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Input -->
+                <form id="chat-form" class="mt-4 pt-4 border-t border-neutral-700">
+                    <div class="flex items-center gap-2">
+                        <span class="text-amber-500">›</span>
+                        <input id="chat-input" type="text" placeholder="Ask Lucas anything..."
+                            class="flex-1 bg-transparent text-neutral-300 placeholder-neutral-600 outline-none text-xs"
+                            autocomplete="off">
+                        <span class="text-amber-500 animate-pulse-slow">▊</span>
+                    </div>
+                </form>
+
+                <!-- Status bar -->
+                <div
+                    class="mt-4 pt-3 border-t border-neutral-800 flex items-center justify-between text-xs text-neutral-600">
+                    <span class="flex items-center gap-2">
+                        <span class="w-2 h-2 bg-green-500 rounded-full"></span>
+                        Connected to cluster
+                    </span>
+                    <span>3 nodes · 12 pods</span>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Mobile Terminal Modal -->
+    <div id="mobile-terminal-modal" class="hidden lg:hidden fixed inset-0 z-50 bg-black/50 backdrop-blur-sm">
+        <div class="absolute bottom-0 left-0 right-0 bg-neutral-900 text-neutral-100 terminal text-sm p-4 rounded-t-2xl h-[90vh] flex flex-col transform transition-transform duration-300"
+            id="mobile-terminal-content">
+            <!-- Handle bar -->
+            <div class="flex justify-center mb-3">
+                <div class="w-10 h-1 bg-neutral-700 rounded-full"></div>
+            </div>
+            <!-- Terminal Header -->
+            <div
+                class="flex items-center justify-between text-neutral-500 text-xs border-b border-neutral-700 pb-3 mb-3">
+                <span class="flex items-center gap-2">
+                    <span class="w-2 h-2 bg-green-500 rounded-full"></span>
+                    Lucas v0.1.0
+                </span>
+                <button onclick="toggleMobileTerminal()" class="text-neutral-400 hover:text-white p-1">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <!-- Welcome Box -->
+            <div class="flex items-center gap-4 mb-4 pb-4 border-b border-neutral-700">
+                <pre class="text-neutral-400 text-[10px] leading-tight">   ▄▄▄▄▄
+  ██▀▀▀██
+  ██   ██
+  ██▄▄▄██
+   ▀▀▀▀▀</pre>
+                <div class="text-xs">
+                    <p class="text-neutral-300 font-medium">Welcome!</p>
+                    <p class="text-neutral-500 mt-1">lucas · a2w lucas</p>
+                    <p class="text-neutral-600">~/your-cluster</p>
+                </div>
+            </div>
+            <!-- Chat messages -->
+            <div id="mobile-chat-messages" class="flex-1 flex flex-col gap-3 text-xs overflow-y-auto mb-3">
+                <div>
+                    <p class="text-neutral-500 mb-1">You</p>
+                    <p class="text-neutral-300">hey lucas, what's the status of the cluster?</p>
+                </div>
+                <div>
+                    <p class="text-amber-500 mb-1">Lucas</p>
+                    <p class="text-neutral-300">All systems operational. Currently monitoring:</p>
+                    <div class="text-neutral-400 mt-2 pl-2">
+                        <p>• 12 pods running across 3 nodes</p>
+                        <p>• CPU usage: 34% avg</p>
+                        <p>• Memory: 2.1GB / 8GB</p>
+                        <p>• No active incidents</p>
+                    </div>
+                </div>
+            </div>
+            <!-- Input -->
+            <form id="mobile-chat-form" class="pt-3 border-t border-neutral-700">
+                <div class="flex items-center gap-2 bg-neutral-800 rounded-lg px-3 py-2">
+                    <span class="text-amber-500">›</span>
+                    <input id="mobile-chat-input" type="text" placeholder="Ask Lucas anything..."
+                        class="flex-1 bg-transparent text-neutral-300 placeholder-neutral-600 outline-none text-xs"
+                        autocomplete="off">
+                    <button type="submit" class="text-amber-500">
+                        <i class="fa-solid fa-paper-plane"></i>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Demo Modal -->
+    <div id="demo-modal"
+        class="hidden fixed inset-0 z-50 bg-black/95 flex items-center justify-center backdrop-blur-sm">
+        <button
+            onclick="document.getElementById('demo-modal').classList.add('hidden'); document.getElementById('demo-video').src = document.getElementById('demo-video').src;"
+            class="absolute top-4 right-4 sm:top-6 sm:right-6 text-white/70 hover:text-white text-sm flex items-center gap-2 transition-colors z-10">
+            <span class="text-xs hidden sm:inline">ESC</span>
+            <span
+                class="w-8 h-8 rounded-full border border-white/20 flex items-center justify-center hover:bg-white/10 transition-colors">×</span>
+        </button>
+        <div class="w-full h-full p-4 sm:p-8 md:p-12 animate-fade-in">
+            <iframe id="demo-video" class="w-full h-full rounded-lg sm:rounded-xl shadow-2xl"
+                src="https://www.youtube.com/embed/dQw4w9WgXcQ" title="Lucas Demo" frameborder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowfullscreen></iframe>
+        </div>
+    </div>
+
+    <!-- Cookie Banner -->
+    <div id="cookie-banner"
+        class="fixed bottom-0 left-0 right-0 z-50 bg-neutral-900 text-white shadow-2xl border-t border-neutral-700 max-h-[90vh] overflow-y-auto">
+        <div class="max-w-5xl mx-auto p-4 sm:p-6">
+            <div class="flex flex-col lg:flex-row gap-6">
+                <!-- Info -->
+                <div class="flex-1">
+                    <h3 class="text-lg font-semibold mb-2">Cookie Preferences</h3>
+                    <p class="text-sm text-neutral-400 mb-4">
+                        We use cookies and similar technologies to help personalize content, tailor and measure ads, and
+                        provide a better experience.
+                        By clicking "Accept All", you consent to the use of all cookies. You can manage your preferences
+                        below.
+                    </p>
+                    <a href="/privacy.html" class="text-sm underline text-neutral-400 hover:text-white">Read our Privacy
+                        Policy</a>
+                </div>
+
+                <!-- Toggles -->
+                <div class="flex-1 space-y-4">
+                    <!-- Essential -->
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-medium">Essential Cookies</p>
+                            <p class="text-xs text-neutral-500">Required for the website to function properly</p>
+                        </div>
+                        <div class="relative">
+                            <input type="checkbox" id="cookie-essential" checked disabled class="sr-only peer">
+                            <div class="w-10 h-5 bg-blue-500 rounded-full"></div>
+                            <div class="absolute top-0.5 left-5 w-4 h-4 bg-white rounded-full"></div>
+                        </div>
+                    </div>
+
+                    <!-- Analytics -->
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-medium">Analytics Cookies</p>
+                            <p class="text-xs text-neutral-500">Help us understand how visitors interact with our site
+                            </p>
+                        </div>
+                        <label class="relative cursor-pointer">
+                            <input type="checkbox" id="cookie-analytics" class="sr-only peer">
+                            <div
+                                class="w-10 h-5 bg-neutral-600 peer-checked:bg-blue-500 rounded-full transition-colors">
+                            </div>
+                            <div
+                                class="absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full peer-checked:left-5 transition-all">
+                            </div>
+                        </label>
+                    </div>
+
+                    <!-- Marketing -->
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-medium">Marketing Cookies</p>
+                            <p class="text-xs text-neutral-500">Used to deliver personalized advertisements</p>
+                        </div>
+                        <label class="relative cursor-pointer">
+                            <input type="checkbox" id="cookie-marketing" class="sr-only peer">
+                            <div
+                                class="w-10 h-5 bg-neutral-600 peer-checked:bg-blue-500 rounded-full transition-colors">
+                            </div>
+                            <div
+                                class="absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full peer-checked:left-5 transition-all">
+                            </div>
+                        </label>
+                    </div>
+
+                    <!-- Functional -->
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-medium">Functional Cookies</p>
+                            <p class="text-xs text-neutral-500">Enable enhanced functionality and personalization</p>
+                        </div>
+                        <label class="relative cursor-pointer">
+                            <input type="checkbox" id="cookie-functional" class="sr-only peer">
+                            <div
+                                class="w-10 h-5 bg-neutral-600 peer-checked:bg-blue-500 rounded-full transition-colors">
+                            </div>
+                            <div
+                                class="absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full peer-checked:left-5 transition-all">
+                            </div>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Buttons -->
+            <div class="flex flex-wrap justify-end gap-3 mt-6 pt-4 border-t border-neutral-700">
+                <button onclick="saveCookiePreferences('essential')"
+                    class="px-5 py-2.5 text-sm border border-neutral-600 rounded-md hover:bg-neutral-800 transition-colors">
+                    Reject All
+                </button>
+                <button onclick="saveCookiePreferences('custom')"
+                    class="px-5 py-2.5 text-sm border border-neutral-600 rounded-md hover:bg-neutral-800 transition-colors">
+                    Save Preferences
+                </button>
+                <button onclick="saveCookiePreferences('all')"
+                    class="px-5 py-2.5 text-sm bg-white text-neutral-900 rounded-md font-medium hover:bg-neutral-200 transition-colors">
+                    Accept All
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Toggle mobile terminal
+        function toggleMobileTerminal() {
+            const modal = document.getElementById('mobile-terminal-modal');
+            modal.classList.toggle('hidden');
+            // Prevent body scroll when modal is open
+            if (!modal.classList.contains('hidden')) {
+                document.body.style.overflow = 'hidden';
+            } else {
+                document.body.style.overflow = '';
+            }
+        }
+
+        // Close mobile terminal when clicking backdrop
+        document.getElementById('mobile-terminal-modal')?.addEventListener('click', (e) => {
+            if (e.target.id === 'mobile-terminal-modal') {
+                toggleMobileTerminal();
+            }
+        });
+
+        // Handle mobile chat form submission
+        document.getElementById('mobile-chat-form')?.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const input = document.getElementById('mobile-chat-input');
+            const message = input.value.trim();
+            if (!message) return;
+
+            const chatContainer = document.getElementById('mobile-chat-messages');
+
+            // Add user message
+            const userMsg = document.createElement('div');
+            userMsg.innerHTML = `<p class="text-neutral-500 mb-1">You</p><p class="text-neutral-300">${message}</p>`;
+            chatContainer.appendChild(userMsg);
+            input.value = '';
+
+            // Simulate Lucas response
+            setTimeout(() => {
+                const lucasMsg = document.createElement('div');
+                lucasMsg.innerHTML = `<p class="text-amber-500 mb-1">Lucas</p><p class="text-neutral-300">Processing your request...</p>`;
+                chatContainer.appendChild(lucasMsg);
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+            }, 500);
+
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        });
+
+        // Toggle terminal panel (desktop)
+        let terminalVisible = true;
+        function toggleTerminal() {
+            const terminal = document.getElementById('terminal-panel');
+            const content = document.getElementById('content-panel');
+            const container = document.getElementById('main-container');
+            const toggle = document.getElementById('terminal-toggle');
+
+            // Only works on desktop (lg+)
+            if (window.innerWidth < 1024) return;
+
+            if (terminalVisible) {
+                // Hide terminal - slide out
+                terminal.style.width = '0';
+                terminal.style.padding = '0';
+                terminal.style.opacity = '0';
+                content.style.width = '100%';
+                content.style.maxWidth = '80rem';
+                content.style.borderRight = 'none';
+                // Calculate margin to center
+                const containerWidth = container.offsetWidth;
+                const targetMargin = Math.max(0, (containerWidth - 1280) / 2);
+                content.style.marginLeft = targetMargin + 'px';
+                content.style.marginRight = targetMargin + 'px';
+                toggle.classList.add('text-neutral-900', 'bg-neutral-200', 'rounded');
+                terminalVisible = false;
+            } else {
+                // Show terminal - slide in
+                content.style.marginLeft = '0';
+                content.style.marginRight = '0';
+                content.style.maxWidth = '';
+                content.style.width = '66.667%';
+                content.style.borderRight = '';
+                content.classList.add('border-e');
+                terminal.style.width = '33.333%';
+                terminal.style.padding = '';
+                terminal.style.opacity = '1';
+                toggle.classList.remove('text-neutral-900', 'bg-neutral-200', 'rounded');
+                terminalVisible = true;
+            }
+        }
+
+        // Update centering on window resize when terminal is hidden
+        window.addEventListener('resize', () => {
+            if (!terminalVisible && window.innerWidth >= 1024) {
+                const content = document.getElementById('content-panel');
+                const container = document.getElementById('main-container');
+                const containerWidth = container.offsetWidth;
+                const targetMargin = Math.max(0, (containerWidth - 1280) / 2);
+                content.style.marginLeft = targetMargin + 'px';
+                content.style.marginRight = targetMargin + 'px';
+            }
+        });
+
+        // Copy install command
+        function copyInstallCmd() {
+            const cmd = 'helm install lucas a2w/lucas --namespace a2w';
+            navigator.clipboard.writeText(cmd).then(() => {
+                const btn = document.getElementById('copy-btn');
+                btn.innerHTML = '<i class="fa-solid fa-check"></i>';
+                btn.classList.add('text-green-400');
+                setTimeout(() => {
+                    btn.innerHTML = '<i class="fa-regular fa-copy"></i>';
+                    btn.classList.remove('text-green-400');
+                }, 2000);
+            });
+        }
+
+        // Close modals with ESC key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                // Close demo modal
+                const demoModal = document.getElementById('demo-modal');
+                if (!demoModal.classList.contains('hidden')) {
+                    demoModal.classList.add('hidden');
+                    document.getElementById('demo-video').src = document.getElementById('demo-video').src;
+                }
+                // Close mobile terminal
+                const mobileTerminal = document.getElementById('mobile-terminal-modal');
+                if (mobileTerminal && !mobileTerminal.classList.contains('hidden')) {
+                    toggleMobileTerminal();
+                }
+            }
+        });
+
+        function saveCookiePreferences(type) {
+            const preferences = {
+                essential: true,
+                analytics: type === 'all' || (type === 'custom' && document.getElementById('cookie-analytics').checked),
+                marketing: type === 'all' || (type === 'custom' && document.getElementById('cookie-marketing').checked),
+                functional: type === 'all' || (type === 'custom' && document.getElementById('cookie-functional').checked)
+            };
+            localStorage.setItem('cookie-preferences', JSON.stringify(preferences));
+            document.getElementById('cookie-banner').classList.add('hidden');
+        }
+
+        // Hide cookie banner if already accepted
+        if (localStorage.getItem('cookie-preferences')) {
+            document.getElementById('cookie-banner').classList.add('hidden');
+        }
+
+        // Load saved preferences when re-opening
+        document.getElementById('cookie-banner').addEventListener('transitionend', () => {
+            const saved = localStorage.getItem('cookie-preferences');
+            if (saved) {
+                const prefs = JSON.parse(saved);
+                document.getElementById('cookie-analytics').checked = prefs.analytics;
+                document.getElementById('cookie-marketing').checked = prefs.marketing;
+                document.getElementById('cookie-functional').checked = prefs.functional;
+            }
+        });
+    </script>
+
+</body>
+
+</html>

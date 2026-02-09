@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: dashboard
-  namespace: clopus-watcher
+  namespace: a2w-lucas
 spec:
   replicas: 1
   selector:
@@ -18,17 +18,17 @@ spec:
       #   - name: regcred
       containers:
         - name: dashboard
-          image: ghcr.io/kubeden/clopus-watcher-dashboard:latest
+          image: ghcr.io/a2wio/lucas-dashboard:latest
           imagePullPolicy: Always
           ports:
             - containerPort: 8080
           env:
             - name: SQLITE_PATH
-              value: "/data/watcher.db"
+              value: "/data/lucas.db"
             - name: PORT
               value: "8080"
             - name: LOG_PATH
-              value: "/data/watcher.log"
+              value: "/data/lucas.log"
           volumeMounts:
             - name: data
               mountPath: /data
@@ -54,4 +54,4 @@ spec:
       volumes:
         - name: data
           persistentVolumeClaim:
-            claimName: watcher-data
+            claimName: lucas-data

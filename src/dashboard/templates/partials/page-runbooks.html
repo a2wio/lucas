@@ -1,0 +1,98 @@
+{{define "page-runbooks.html"}}
+<div class="flex-1 p-6 overflow-y-auto bg-neutral-100">
+    <div>
+        <div class="mb-6">
+            <h1 class="text-xl font-semibold text-neutral-900">Runbooks</h1>
+            <p class="text-sm text-neutral-500 mt-1">Remediation guides the agent follows when diagnosing issues</p>
+        </div>
+
+        {{if .Runbooks}}
+        <div class="space-y-4">
+            {{range .Runbooks}}
+            <div class="bg-white border border-neutral-300 rounded-lg overflow-hidden hover:shadow-sm transition-shadow">
+                <div class="px-4 py-3 border-b border-neutral-200 bg-neutral-50 flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <i class="fa-solid fa-book text-amber-500"></i>
+                        <h3 class="font-medium text-neutral-900">{{.Name}}</h3>
+                    </div>
+                    <span class="text-xs text-neutral-500">{{.Filename}}</span>
+                </div>
+                <div class="p-4">
+                    <p class="text-sm text-neutral-600 mb-3">{{.Description}}</p>
+                    {{if .Triggers}}
+                    <div class="flex flex-wrap gap-2">
+                        {{range .Triggers}}
+                        <span class="px-2 py-1 bg-neutral-200 rounded text-xs text-neutral-700">{{.}}</span>
+                        {{end}}
+                    </div>
+                    {{end}}
+                </div>
+            </div>
+            {{end}}
+        </div>
+        {{else}}
+        <!-- Default runbooks when not loaded from DB -->
+        <div class="space-y-4">
+            <div class="bg-white border border-neutral-300 rounded-lg overflow-hidden hover:shadow-sm transition-shadow">
+                <div class="px-4 py-3 border-b border-neutral-200 bg-neutral-50 flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <i class="fa-solid fa-book text-red-500"></i>
+                        <h3 class="font-medium text-neutral-900">CrashLoopBackOff</h3>
+                    </div>
+                    <span class="text-xs text-neutral-500">crashloopbackoff.md</span>
+                </div>
+                <div class="p-4">
+                    <p class="text-sm text-neutral-600 mb-3">Handles pods stuck in CrashLoopBackOff state. Analyzes logs, checks resource limits, and applies fixes.</p>
+                    <div class="flex flex-wrap gap-2">
+                        <span class="px-2 py-1 bg-red-100 border border-red-200 rounded text-xs text-red-700">CrashLoopBackOff</span>
+                        <span class="px-2 py-1 bg-neutral-200 rounded text-xs text-neutral-700">Error</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white border border-neutral-300 rounded-lg overflow-hidden hover:shadow-sm transition-shadow">
+                <div class="px-4 py-3 border-b border-neutral-200 bg-neutral-50 flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <i class="fa-solid fa-book text-amber-500"></i>
+                        <h3 class="font-medium text-neutral-900">OOMKilled</h3>
+                    </div>
+                    <span class="text-xs text-neutral-500">oom-killed.md</span>
+                </div>
+                <div class="p-4">
+                    <p class="text-sm text-neutral-600 mb-3">Addresses Out Of Memory killed containers. Analyzes memory usage patterns and adjusts resource limits.</p>
+                    <div class="flex flex-wrap gap-2">
+                        <span class="px-2 py-1 bg-amber-100 border border-amber-200 rounded text-xs text-amber-700">OOMKilled</span>
+                        <span class="px-2 py-1 bg-neutral-200 rounded text-xs text-neutral-700">Memory</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white border border-neutral-300 rounded-lg overflow-hidden hover:shadow-sm transition-shadow">
+                <div class="px-4 py-3 border-b border-neutral-200 bg-neutral-50 flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <i class="fa-solid fa-book text-blue-500"></i>
+                        <h3 class="font-medium text-neutral-900">ImagePullBackOff</h3>
+                    </div>
+                    <span class="text-xs text-neutral-500">image-pull-backoff.md</span>
+                </div>
+                <div class="p-4">
+                    <p class="text-sm text-neutral-600 mb-3">Resolves image pull failures. Checks registry credentials, image tags, and network connectivity.</p>
+                    <div class="flex flex-wrap gap-2">
+                        <span class="px-2 py-1 bg-blue-100 border border-blue-200 rounded text-xs text-blue-700">ImagePullBackOff</span>
+                        <span class="px-2 py-1 bg-blue-100 border border-blue-200 rounded text-xs text-blue-700">ErrImagePull</span>
+                        <span class="px-2 py-1 bg-neutral-200 rounded text-xs text-neutral-700">Registry</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-6 p-4 bg-neutral-50 border border-neutral-300 rounded-lg">
+            <p class="text-sm text-neutral-600">
+                <i class="fa-solid fa-circle-info text-neutral-400 mr-1"></i>
+                Runbooks are defined in <code class="text-neutral-700 bg-neutral-200 px-1 rounded">/runbooks/</code> inside the agent container and loaded as Claude Code skills.
+            </p>
+        </div>
+        {{end}}
+    </div>
+</div>
+{{end}}

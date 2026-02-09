@@ -1,0 +1,14 @@
+{{define "stats.html"}}
+{{if .}}
+<div class="flex items-center gap-3 text-sm">
+    <span class="text-neutral-500">Runs</span>
+    <span class="font-mono text-neutral-900">{{.RunCount}}</span>
+    <span class="text-neutral-300">|</span>
+    <span class="text-emerald-600">{{.OkCount}} ok</span>
+    <span class="text-neutral-300">|</span>
+    <span class="text-amber-600">{{.FixedCount}} fixed</span>
+    <span class="text-neutral-300">|</span>
+    <span class="text-red-600">{{.FailedCount}} failed</span>
+</div>
+{{end}}
+{{end}}

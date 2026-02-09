@@ -1,13 +1,13 @@
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: clopus-watcher
-  namespace: clopus-watcher
+  name: a2w-lucas
+  namespace: a2w-lucas
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: clopus-watcher
+  name: a2w-lucas
 rules:
   # Read pods and their status
   - apiGroups: [""]
@@ -33,12 +33,12 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
-  name: clopus-watcher
+  name: a2w-lucas
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: clopus-watcher
+  name: a2w-lucas
 subjects:
   - kind: ServiceAccount
-    name: clopus-watcher
-    namespace: clopus-watcher
+    name: a2w-lucas
+    namespace: a2w-lucas

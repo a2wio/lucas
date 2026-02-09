@@ -1,0 +1,52 @@
+{{define "page-overview.html"}}
+<div class="flex h-full">
+    <!-- Runs List -->
+    <div class="w-72 border-r border-neutral-300 flex flex-col bg-neutral-50">
+        <div class="p-3 border-b border-neutral-300">
+            <h2 class="text-xs font-semibold uppercase tracking-wider text-neutral-500">Runs</h2>
+        </div>
+        <div id="runs-list" class="flex-1 overflow-y-auto scrollbar-thin"
+             hx-get="/partials/runs?ns={{.CurrentNS}}"
+             hx-trigger="every 30s">
+            {{template "runs-list.html" .}}
+        </div>
+    </div>
+
+    <!-- Run Detail -->
+    <div class="flex-1 flex flex-col min-w-0 bg-neutral-100">
+        {{if .SelectedRun}}
+        <div id="run-detail" class="flex-1 overflow-y-auto">
+            {{template "run-detail.html" (dict "Run" .SelectedRun "Fixes" .SelectedFixes)}}
+        </div>
+        {{else}}
+        <div class="flex-1 flex items-center justify-center text-neutral-500">
+            <div class="text-center">
+                <i class="fa-solid fa-inbox text-4xl text-neutral-300 mb-4"></i>
+                <p class="text-lg mb-2 text-neutral-600">No runs yet</p>
+                <p class="text-sm text-neutral-500">Agent runs on schedule or via Slack</p>
+            </div>
+        </div>
+        {{end}}
+
+        <!-- Live Log (collapsible) -->
+        <div class="border-t border-neutral-300">
+            <button onclick="toggleLog()" class="w-full px-4 py-2 flex items-center justify-between text-sm text-neutral-600 hover:bg-neutral-200 transition-colors">
+                <span class="flex items-center gap-2">
+                    <i class="fa-solid fa-terminal text-neutral-400"></i>
+                    Live Terminal
+                </span>
+                <i id="log-chevron" class="fa-solid fa-chevron-up text-neutral-400 transition-transform"></i>
+            </button>
+            <div id="log-panel" class="hidden bg-neutral-900 border-t border-neutral-300">
+                <div id="live-log"
+                     class="h-48 p-3 font-mono text-xs text-neutral-400 overflow-y-auto scrollbar-thin"
+                     hx-get="/partials/log"
+                     hx-trigger="every 3s"
+                     hx-swap="innerHTML">
+                    {{.Log}}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{{end}}

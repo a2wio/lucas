@@ -1,0 +1,56 @@
+{{define "page-sessions.html"}}
+<div class="flex-1 p-6 overflow-y-auto bg-neutral-100">
+    <div>
+        <div class="mb-6">
+            <h1 class="text-xl font-semibold text-neutral-900">Sessions</h1>
+            <p class="text-sm text-neutral-500 mt-1">Active Claude Code sessions for Slack threads</p>
+        </div>
+
+        {{if .Sessions}}
+        <div class="space-y-3">
+            {{range .Sessions}}
+            <div class="bg-white border border-neutral-300 rounded-lg p-4 hover:border-neutral-400 hover:shadow-sm transition-all">
+                <div class="flex items-start justify-between">
+                    <div class="flex-1 min-w-0">
+                        <div class="flex items-center gap-3 mb-2">
+                            <span class="text-sm font-mono text-emerald-600">{{.SessionID}}</span>
+                            <span class="px-2 py-0.5 bg-neutral-200 rounded text-xs text-neutral-600">{{.Namespace}}</span>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4 text-sm">
+                            <div>
+                                <span class="text-neutral-500">Channel:</span>
+                                <span class="text-neutral-700 ml-2">{{.Channel}}</span>
+                            </div>
+                            <div>
+                                <span class="text-neutral-500">Thread:</span>
+                                <span class="text-neutral-700 ml-2 font-mono">{{.ThreadTS}}</span>
+                            </div>
+                            <div>
+                                <span class="text-neutral-500">Created:</span>
+                                <span class="text-neutral-700 ml-2">{{.CreatedAt}}</span>
+                            </div>
+                            <div>
+                                <span class="text-neutral-500">Updated:</span>
+                                <span class="text-neutral-700 ml-2">{{.UpdatedAt}}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <button onclick="deleteSession('{{.SessionID}}')"
+                            class="ml-4 p-2 text-neutral-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors"
+                            title="Delete session">
+                        <i class="fa-solid fa-trash"></i>
+                    </button>
+                </div>
+            </div>
+            {{end}}
+        </div>
+        {{else}}
+        <div class="bg-white border border-neutral-300 rounded-lg p-8 text-center">
+            <i class="fa-solid fa-comments text-4xl text-neutral-300 mb-3"></i>
+            <p class="text-neutral-600 mb-1">No active sessions</p>
+            <p class="text-sm text-neutral-500">Sessions are created when users interact with the agent via Slack</p>
+        </div>
+        {{end}}
+    </div>
+</div>
+{{end}}

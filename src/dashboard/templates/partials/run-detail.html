@@ -1,0 +1,98 @@
+{{define "run-detail.html"}}
+<div class="p-6">
+    <!-- Header -->
+    <div class="flex items-start justify-between mb-6">
+        <div>
+            <h1 class="text-xl font-semibold mb-1 text-neutral-900">Run #{{.Run.ID}}</h1>
+            <div class="text-sm text-neutral-500">
+                {{.Run.Namespace}} &middot; {{.Run.Mode}} mode &middot; {{.Run.StartedAt}}
+            </div>
+        </div>
+        <div class="flex items-center gap-2">
+            {{if eq .Run.Status "ok"}}
+            <span class="px-3 py-1 bg-emerald-100 text-emerald-700 rounded-full text-sm font-medium">All OK</span>
+            {{else if eq .Run.Status "fixed"}}
+            <span class="px-3 py-1 bg-amber-100 text-amber-700 rounded-full text-sm font-medium">Fixed</span>
+            {{else if eq .Run.Status "failed"}}
+            <span class="px-3 py-1 bg-red-100 text-red-700 rounded-full text-sm font-medium">Failed</span>
+            {{else if eq .Run.Status "issues_found"}}
+            <span class="px-3 py-1 bg-orange-100 text-orange-700 rounded-full text-sm font-medium">Issues Found</span>
+            {{else}}
+            <span class="px-3 py-1 bg-neutral-200 text-neutral-600 rounded-full text-sm font-medium">Running...</span>
+            {{end}}
+        </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="grid grid-cols-3 gap-4 mb-6">
+        <div class="bg-white rounded-lg p-4 border border-neutral-300 hover:shadow-sm transition-shadow">
+            <div class="text-2xl font-semibold text-neutral-900">{{.Run.PodCount}}</div>
+            <div class="text-xs text-neutral-500 uppercase tracking-wider">Pods Checked</div>
+        </div>
+        <div class="bg-white rounded-lg p-4 border border-neutral-300 hover:shadow-sm transition-shadow">
+            <div class="text-2xl font-semibold {{if gt .Run.ErrorCount 0}}text-red-600{{else}}text-neutral-900{{end}}">{{.Run.ErrorCount}}</div>
+            <div class="text-xs text-neutral-500 uppercase tracking-wider">Errors Found</div>
+        </div>
+        <div class="bg-white rounded-lg p-4 border border-neutral-300 hover:shadow-sm transition-shadow">
+            <div class="text-2xl font-semibold {{if gt .Run.FixCount 0}}text-emerald-600{{else}}text-neutral-900{{end}}">{{.Run.FixCount}}</div>
+            <div class="text-xs text-neutral-500 uppercase tracking-wider">Fixes Applied</div>
+        </div>
+    </div>
+
+    <!-- Report -->
+    {{if .Run.Report}}
+    <div class="mb-6">
+        <h2 class="text-sm font-semibold uppercase tracking-wider text-neutral-500 mb-3">Report</h2>
+        <div class="bg-white rounded-lg p-4 border border-neutral-300">
+            <pre class="text-sm text-neutral-700 whitespace-pre-wrap font-mono">{{.Run.Report}}</pre>
+        </div>
+    </div>
+    {{end}}
+
+    <!-- Fixes -->
+    {{if .Fixes}}
+    <div class="mb-6">
+        <h2 class="text-sm font-semibold uppercase tracking-wider text-neutral-500 mb-3">Issues & Fixes</h2>
+        <div class="space-y-3">
+            {{range .Fixes}}
+            <div class="bg-white rounded-lg p-4 border border-neutral-300 hover:shadow-sm transition-shadow">
+                <div class="flex items-start justify-between mb-2">
+                    <div class="font-medium text-neutral-900">{{.PodName}}</div>
+                    {{if eq .Status "success"}}
+                    <span class="text-xs px-2 py-0.5 bg-emerald-100 text-emerald-700 rounded">Fixed</span>
+                    {{else if eq .Status "failed"}}
+                    <span class="text-xs px-2 py-0.5 bg-red-100 text-red-700 rounded">Failed</span>
+                    {{else if eq .Status "reported"}}
+                    <span class="text-xs px-2 py-0.5 bg-blue-100 text-blue-700 rounded">Reported</span>
+                    {{else}}
+                    <span class="text-xs px-2 py-0.5 bg-neutral-200 text-neutral-600 rounded">{{.Status}}</span>
+                    {{end}}
+                </div>
+                <div class="text-sm text-red-600 mb-1">{{.ErrorType}}</div>
+                {{if .ErrorMessage}}
+                <div class="text-xs text-neutral-500 mb-2">{{.ErrorMessage}}</div>
+                {{end}}
+                {{if .FixApplied}}
+                <div class="text-sm text-neutral-700 mt-2 pt-2 border-t border-neutral-200">
+                    <span class="text-emerald-600">→</span> {{.FixApplied}}
+                </div>
+                {{end}}
+            </div>
+            {{end}}
+        </div>
+    </div>
+    {{end}}
+
+    <!-- Log -->
+    {{if .Run.Log}}
+    <div>
+        <h2 class="text-sm font-semibold uppercase tracking-wider text-neutral-500 mb-3">Full Log</h2>
+        <div class="bg-neutral-900 rounded-lg border border-neutral-300 overflow-hidden">
+            <div class="max-h-96 overflow-y-auto p-4 scrollbar-thin">
+                <pre class="text-xs text-neutral-400 whitespace-pre-wrap font-mono">{{.Run.Log}}</pre>
+            </div>
+        </div>
+    </div>
+    {{end}}
+</div>
+{{end}}

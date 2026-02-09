@@ -1,0 +1,95 @@
+{{define "page-costs.html"}}
+<div class="flex-1 p-6 overflow-y-auto bg-neutral-100">
+    <div>
+        <div class="mb-6">
+            <h1 class="text-xl font-semibold text-neutral-900">Costs</h1>
+            <p class="text-sm text-neutral-500 mt-1">Token usage and estimated API costs</p>
+        </div>
+
+        <!-- Summary Cards -->
+        <div class="grid grid-cols-4 gap-4 mb-6">
+            <div class="bg-white border border-neutral-300 rounded-lg p-4 hover:shadow-sm transition-shadow">
+                <div class="text-xs text-neutral-500 uppercase tracking-wider mb-1">Total Input Tokens</div>
+                <div class="text-2xl font-mono text-neutral-900">{{formatNumber .CostStats.TotalInputTokens}}</div>
+            </div>
+            <div class="bg-white border border-neutral-300 rounded-lg p-4 hover:shadow-sm transition-shadow">
+                <div class="text-xs text-neutral-500 uppercase tracking-wider mb-1">Total Output Tokens</div>
+                <div class="text-2xl font-mono text-neutral-900">{{formatNumber .CostStats.TotalOutputTokens}}</div>
+            </div>
+            <div class="bg-white border border-neutral-300 rounded-lg p-4 hover:shadow-sm transition-shadow">
+                <div class="text-xs text-neutral-500 uppercase tracking-wider mb-1">Total Tokens</div>
+                <div class="text-2xl font-mono text-neutral-900">{{formatNumber .CostStats.TotalTokens}}</div>
+            </div>
+            <div class="bg-white border border-neutral-300 rounded-lg p-4 hover:shadow-sm transition-shadow">
+                <div class="text-xs text-neutral-500 uppercase tracking-wider mb-1">Est. Cost</div>
+                <div class="text-2xl font-mono text-emerald-600">${{printf "%.2f" .CostStats.TotalCost}}</div>
+            </div>
+        </div>
+
+        <!-- Pricing Info -->
+        <div class="bg-neutral-50 border border-neutral-300 rounded-lg p-4 mb-6">
+            <div class="flex items-center gap-2 text-xs text-neutral-500 uppercase tracking-wider mb-2">
+                <i class="fa-solid fa-circle-info"></i>
+                Pricing Reference (per 1M tokens)
+            </div>
+            <div class="flex gap-8 text-sm">
+                <div>
+                    <span class="text-neutral-500">Sonnet:</span>
+                    <span class="text-neutral-700 ml-2">$3 input / $15 output</span>
+                </div>
+                <div>
+                    <span class="text-neutral-500">Opus:</span>
+                    <span class="text-neutral-700 ml-2">$15 input / $75 output</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Usage by Run -->
+        <div class="bg-white border border-neutral-300 rounded-lg overflow-hidden">
+            <div class="px-4 py-3 border-b border-neutral-200 bg-neutral-50">
+                <h2 class="text-sm font-semibold text-neutral-900">Usage by Run</h2>
+            </div>
+            {{if .TokenUsage}}
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm">
+                    <thead class="bg-neutral-100">
+                        <tr>
+                            <th class="text-left px-4 py-2 text-xs text-neutral-500 uppercase tracking-wider">Run ID</th>
+                            <th class="text-left px-4 py-2 text-xs text-neutral-500 uppercase tracking-wider">Namespace</th>
+                            <th class="text-left px-4 py-2 text-xs text-neutral-500 uppercase tracking-wider">Model</th>
+                            <th class="text-right px-4 py-2 text-xs text-neutral-500 uppercase tracking-wider">Input</th>
+                            <th class="text-right px-4 py-2 text-xs text-neutral-500 uppercase tracking-wider">Output</th>
+                            <th class="text-right px-4 py-2 text-xs text-neutral-500 uppercase tracking-wider">Total</th>
+                            <th class="text-right px-4 py-2 text-xs text-neutral-500 uppercase tracking-wider">Cost</th>
+                            <th class="text-left px-4 py-2 text-xs text-neutral-500 uppercase tracking-wider">Time</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-neutral-200">
+                        {{range .TokenUsage}}
+                        <tr class="hover:bg-neutral-50 transition-colors">
+                            <td class="px-4 py-3 font-mono text-xs text-neutral-600">{{.RunID}}</td>
+                            <td class="px-4 py-3">
+                                <span class="px-2 py-0.5 bg-neutral-200 rounded text-xs text-neutral-700">{{.Namespace}}</span>
+                            </td>
+                            <td class="px-4 py-3 text-neutral-600">{{.Model}}</td>
+                            <td class="px-4 py-3 text-right font-mono text-neutral-900">{{formatNumber .InputTokens}}</td>
+                            <td class="px-4 py-3 text-right font-mono text-neutral-900">{{formatNumber .OutputTokens}}</td>
+                            <td class="px-4 py-3 text-right font-mono text-neutral-900">{{formatNumber .TotalTokens}}</td>
+                            <td class="px-4 py-3 text-right font-mono text-emerald-600">${{printf "%.4f" .Cost}}</td>
+                            <td class="px-4 py-3 text-neutral-500">{{.CreatedAt}}</td>
+                        </tr>
+                        {{end}}
+                    </tbody>
+                </table>
+            </div>
+            {{else}}
+            <div class="p-8 text-center">
+                <i class="fa-solid fa-dollar-sign text-4xl text-neutral-300 mb-3"></i>
+                <p class="text-neutral-600 mb-1">No usage data yet</p>
+                <p class="text-sm text-neutral-500">Token usage will appear after the agent processes runs</p>
+            </div>
+            {{end}}
+        </div>
+    </div>
+</div>
+{{end}}

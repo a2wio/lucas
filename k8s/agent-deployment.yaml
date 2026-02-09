@@ -1,0 +1,116 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: a2w-lucas-agent
+  namespace: a2w-lucas
+  labels:
+    app: a2w-lucas-agent
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: a2w-lucas-agent
+  template:
+    metadata:
+      labels:
+        app: a2w-lucas-agent
+    spec:
+      serviceAccountName: a2w-lucas
+      # Uncomment if using private registry:
+      # imagePullSecrets:
+      #   - name: regcred
+      initContainers:
+        - name: fix-permissions
+          image: busybox
+          command: ["sh", "-c", "chmod -R 777 /data && mkdir -p /claude-sessions && chmod -R 777 /claude-sessions"]
+          volumeMounts:
+            - name: data
+              mountPath: /data
+            - name: claude-sessions
+              mountPath: /claude-sessions
+          securityContext:
+            runAsUser: 0
+        - name: copy-skills
+          image: ghcr.io/a2wio/lucas-agent:latest
+          command: ["sh", "-c", "cp -r /home/claude/.claude/skills /claude-sessions/ 2>/dev/null || true"]
+          volumeMounts:
+            - name: claude-sessions
+              mountPath: /claude-sessions
+      containers:
+        - name: agent
+          image: ghcr.io/a2wio/lucas-agent:latest
+          imagePullPolicy: Always
+          env:
+            # Namespace(s) to monitor - comma-separated for multiple
+            - name: TARGET_NAMESPACE
+              value: "default"
+            - name: TARGET_NAMESPACES
+              value: "default"
+            # SRE_MODE: "autonomous" (can make changes) or "watcher" (read-only)
+            - name: SRE_MODE
+              value: "autonomous"
+            # CLAUDE_MODEL: "sonnet" or "opus" (defaults to sonnet)
+            - name: CLAUDE_MODEL
+              value: "sonnet"
+            # Database path (shared with dashboard)
+            - name: SQLITE_PATH
+              value: "/data/lucas.db"
+            - name: HOME
+              value: "/home/claude"
+            # Anthropic API Key
+            - name: ANTHROPIC_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: claude-auth
+                  key: api-key
+            # Slack Bot credentials (required for interactive mode)
+            - name: SLACK_BOT_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: slack-bot
+                  key: bot-token
+            - name: SLACK_APP_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: slack-bot
+                  key: app-token
+            # Channel for alerts and scheduled scans
+            - name: SRE_ALERT_CHANNEL
+              valueFrom:
+                secretKeyRef:
+                  name: slack-bot
+                  key: alert-channel
+                  optional: true
+            # Scan interval in seconds
+            - name: SCAN_INTERVAL_SECONDS
+              value: "3600"
+            # Prompt file
+            - name: PROMPT_FILE
+              value: "/app/master-prompt-interactive.md"
+          volumeMounts:
+            - name: data
+              mountPath: /data
+            - name: claude-sessions
+              mountPath: /home/claude/.claude
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "100m"
+            limits:
+              memory: "1Gi"
+              cpu: "500m"
+          livenessProbe:
+            exec:
+              command:
+                - python3
+                - -c
+                - "import os; exit(0)"
+            initialDelaySeconds: 30
+            periodSeconds: 60
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: lucas-data
+        - name: claude-sessions
+          persistentVolumeClaim:
+            claimName: claude-sessions

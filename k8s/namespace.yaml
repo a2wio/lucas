@@ -1,6 +1,6 @@
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: clopus-watcher
+  name: a2w-lucas
   labels:
-    app: clopus-watcher
+    app: a2w-lucas
