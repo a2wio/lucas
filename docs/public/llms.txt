@@ -1,0 +1,74 @@
+# A2W: Lucas — LLM Guide (New Kubernetes agent)
+
+## What this is
+A2W: Lucas is a new Kubernetes operations and reliability agent. It runs inside a cluster, inspects pods and logs, can report or remediate issues based on mode, and exposes a dashboard backed by SQLite.
+
+## Core capabilities
+- Slack-first investigations with thread context and follow-ups.
+- Scheduled scans across namespaces.
+- Runbooks that define approved fixes and escalation rules.
+- Dashboard for runs, sessions, and token usage.
+- CronJob mode for batch scans and Slack webhook notifications.
+
+## Key concepts
+- Interactive agent runs continuously and responds to Slack mentions.
+- CronJob mode runs on a schedule and writes results to SQLite.
+- SQLite is the shared data store for runs, fixes, sessions, and token usage.
+- PVCs persist the database, logs, and Claude session data.
+
+## Modes
+Interactive agent (`SRE_MODE`):
+- `autonomous`: can fix issues.
+- `watcher`: report-only.
+
+CronJob (`SRE_MODE`):
+- `autonomous`: fix issues.
+- `report`: report-only.
+
+## Configuration highlights
+Interactive agent:
+- Required: `ANTHROPIC_API_KEY`, `SLACK_BOT_TOKEN`, `SLACK_APP_TOKEN`.
+- Common: `SRE_MODE`, `CLAUDE_MODEL`, `TARGET_NAMESPACE`, `TARGET_NAMESPACES`, `SRE_ALERT_CHANNEL`, `SCAN_INTERVAL_SECONDS`, `SQLITE_PATH`.
+
+CronJob:
+- Required: `TARGET_NAMESPACE`, `SRE_MODE`, `AUTH_MODE`.
+- Auth: `ANTHROPIC_API_KEY` (api-key) or `credentials.json` (credentials).
+- Optional: `SLACK_WEBHOOK_URL`, `SQLITE_PATH`.
+
+Dashboard:
+- `SQLITE_PATH`, `PORT`, `LOG_PATH`, `AUTH_USER`, `AUTH_PASS`.
+
+## Primary docs
+- /guide/getting-started
+- /guide/architecture
+- /guide/configuration
+- /guide/slack
+- /guide/build
+- /ops/deployment
+- /ops/deployment-argocd
+- /ops/deployment-yaml
+- /ops/cronjob
+- /ops/dashboard
+- /ops/operations
+- /ops/runbooks
+- /ops/troubleshooting
+
+## Repo structure
+- src/agent/ : Slack agent, scheduler, runbooks, prompts
+- src/dashboard/ : Go dashboard and templates
+- k8s/ : Kubernetes manifests
+- scripts/ : install helper
+
+## Runbooks (agent)
+Runbooks live in `src/agent/runbooks/` and are loaded by the agent. You can add your own runbooks (Markdown) to capture team-specific procedures and escalation rules, then rebuild the agent image.
+
+## Master prompts
+Lucas behavior is driven by master prompt files packaged into the agent image. The prompt selected depends on mode:
+
+- Interactive agent: `master-prompt-interactive.md` (autonomous) or `master-prompt-interactive-report.md` (watcher).
+- CronJob: `master-prompt-autonomous.md` or `master-prompt-report.md`.
+
+Prompts define allowed tools, tone, runbook usage, and how to report results. The agent replaces variables like `$TARGET_NAMESPACE`, `$SQLITE_PATH`, `$RUN_ID`, and `$LAST_RUN_TIME` at runtime.
+
+## Repository
+https://github.com/a2wio/lucas

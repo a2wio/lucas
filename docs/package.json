@@ -1,0 +1,16 @@
+{
+  "name": "a2w-lucas-docs",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vitepress dev .",
+    "build": "vitepress build .",
+    "preview": "vitepress preview ."
+  },
+  "devDependencies": {
+    "vitepress": "^1.6.4"
+  },
+  "overrides": {
+    "esbuild": "^0.25.0"
+  }
+}
