@@ -1,0 +1,25 @@
+# Build docs on the build platform to avoid cross-arch tool issues
+ARG BUILDPLATFORM
+ARG TARGETPLATFORM
+
+FROM --platform=$BUILDPLATFORM node:20-alpine AS builder
+
+WORKDIR /app
+
+# VitePress uses git for lastUpdated; install it for builds
+RUN apk add --no-cache git
+
+# Install deps
+COPY docs/package.json docs/package-lock.json ./docs/
+RUN cd docs && npm ci
+
+# Build site
+COPY docs ./docs
+RUN cd docs && npm run build
+
+# Serve static site
+FROM --platform=$TARGETPLATFORM nginx:1.25-alpine
+COPY --from=builder /app/docs/.vitepress/dist /usr/share/nginx/html
+
+EXPOSE 80
+CMD ["nginx", "-g", "daemon off;"]

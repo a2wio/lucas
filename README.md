@@ -1,144 +1,119 @@
 # A2W: Lucas
 
-A Kubernetes-native Claude Code agent that monitors pods, detects errors, and applies hotfixes directly, or just writes a report on its findings.
+A Kubernetes operations and reliability agent. It runs in-cluster, inspects pods and logs, can report or remediate issues based on mode, and exposes a dashboard backed by SQLite.
 
-## Overview
+## What it does
 
-A2W's Lucas agent runs as a Slack-integrated service that:
-1. Responds to @mentions for on-demand Kubernetes tasks
-2. Runs scheduled scans on configured namespaces
-3. Detects degraded pods (CrashLoopBackOff, Error, etc.)
-4. Reads logs to understand errors
-5. Can exec into pods and apply hotfixes (autonomous mode)
-6. Records findings to SQLite & provides reports via dashboard
-
-A separate Dashboard deployment provides a web UI to view all detected errors, applied fixes, and token costs.
-
-## Prerequisites
-
-**Cluster:**
-
-- Kubernetes cluster
-- Sealed Secrets controller (for API key / Slack credentials)
-
-**Local (to build the images):**
-
-- podman / docker
-- kubectl
-- kubeseal
-- Container registry access
-
-## Environment Variables
-
-### Agent
-
-| Variable | Description | Default | Required |
-|----------|-------------|---------|----------|
-| `ANTHROPIC_API_KEY` | Claude API key | - | Yes |
-| `SLACK_BOT_TOKEN` | Slack bot token (xoxb-...) | - | Yes |
-| `SLACK_APP_TOKEN` | Slack app token (xapp-...) | - | Yes |
-| `SRE_ALERT_CHANNEL` | Slack channel ID for scheduled scan alerts | - | No |
-| `TARGET_NAMESPACE` | Primary namespace to monitor | `default` | No |
-| `TARGET_NAMESPACES` | Comma-separated namespaces for scheduled scans | `default` | No |
-| `LUCAS_MODE` | Agent mode: `autonomous` (can fix) or `watcher` (report only) | `autonomous` | No |
-| `CLAUDE_MODEL` | Model to use: `sonnet` or `opus` | `sonnet` | No |
-| `SCAN_INTERVAL_SECONDS` | Seconds between scheduled scans | `300` | No |
-| `PROMPT_FILE` | Path to system prompt file | `/app/master-prompt-interactive.md` | No |
-| `SQLITE_PATH` | Path to SQLite database | `/data/lucas.db` | No |
-
-### Dashboard
-
-| Variable | Description | Default | Required |
-|----------|-------------|---------|----------|
-| `SQLITE_PATH` | Path to SQLite database (shared with agent) | `/data/lucas.db` | No |
-| `PORT` | HTTP server port | `8080` | No |
-| `LOG_PATH` | Path to log file | `/data/lucas.log` | No |
-| `AUTH_USER` | Dashboard login username | `a2wmin` | No |
-| `AUTH_PASS` | Dashboard login password | `a2wssword` | No |
-
-## Deployment
-
-### 1. Create Sealed Secrets
-
-```bash
-# Claude API key
-kubectl create secret generic claude-auth \
-  --namespace=a2w-lucas \
-  --from-literal=api-key=sk-ant-xxxxx \
-  --dry-run=client -o yaml | \
-  kubeseal --controller-namespace sealed-secrets --controller-name sealed-secrets-controller -o yaml > claude-auth.yml
-
-# Slack credentials
-kubectl create secret generic slack-bot \
-  --namespace=a2w-lucas \
-  --from-literal=bot-token="xoxb-..." \
-  --from-literal=app-token="xapp-..." \
-  --from-literal=alert-channel="C0123456789" \
-  --dry-run=client -o yaml | \
-  kubeseal --controller-namespace sealed-secrets --controller-name sealed-secrets-controller -o yaml > slack-bot.yml
-```
-
-### 2. Build and Push Images
-
-```bash
-# Agent image
-podman build --platform=linux/amd64 -f Dockerfile.agent -t registry.example.com/a2w/lucas:v0.1 .
-podman push registry.example.com/a2w/lucas:v0.1
-
-# Dashboard image
-podman build --platform=linux/amd64 -f Dockerfile.dashboard -t registry.example.com/a2w/lucas-dashboard:v0.1 .
-podman push registry.example.com/a2w/lucas-dashboard:v0.1
-```
-
-### 3. Deploy
-
-Apply the Kubernetes manifests:
-
-```bash
-kubectl apply -f k8s/
-```
-
-Or if using ArgoCD, the application will sync automatically.
+- Slack-first investigations with thread context.
+- Scheduled scans across namespaces.
+- Optional remediation when allowed.
+- Dashboard for runs, sessions, and token usage.
 
 ## Modes
 
-### Autonomous Mode (`LUCAS_MODE=autonomous`)
-- Can execute commands inside pods
-- Can apply hotfixes
-- Full remediation capabilities
+Interactive agent (`Dockerfile.agent`):
 
-### Watcher Mode (`LUCAS_MODE=watcher`)
-- Read-only access
-- Reports issues without making changes
-- Safe for production observation
+- `SRE_MODE=autonomous`: can fix issues.
+- `SRE_MODE=watcher`: report-only.
 
-## Models
+CronJob agent (`Dockerfile.lucas`):
 
-| Model | Cost (Input/Output per 1M tokens) | Best For |
-|-------|-----------------------------------|----------|
-| `sonnet` | $3 / $15 | General use, cost-effective |
-| `opus` | $15 / $75 | Complex debugging, thorough analysis |
+- `SRE_MODE=autonomous`: can fix issues.
+- `SRE_MODE=report`: report-only.
 
-## Slack Commands
+## Environment variables
 
-Mention the bot in any channel it's invited to:
+### Interactive agent
 
-- `@lucas check pods in namespace xyz` - Health check
-- `@lucas why is pod abc crashing?` - Investigate specific pod
-- `@lucas show recent errors` - Review error logs
-- `@lucas help` - Show available commands
+Required:
 
-Thread replies maintain conversation context for follow-up questions.
+- `ANTHROPIC_API_KEY`
+- `SLACK_BOT_TOKEN`
+- `SLACK_APP_TOKEN`
+
+Common:
+
+- `SRE_MODE` (`autonomous` or `watcher`)
+- `CLAUDE_MODEL` (`sonnet` or `opus`)
+- `TARGET_NAMESPACE`
+- `TARGET_NAMESPACES` (comma-separated)
+- `SRE_ALERT_CHANNEL` (enables scheduled scans)
+- `SCAN_INTERVAL_SECONDS`
+- `SQLITE_PATH` (default `/data/lucas.db`)
+- `PROMPT_FILE` (default `/app/master-prompt-interactive.md`)
+
+### CronJob agent
+
+Required:
+
+- `TARGET_NAMESPACE`
+- `SRE_MODE` (`autonomous` or `report`)
+- `AUTH_MODE` (`api-key` or `credentials`)
+
+If `AUTH_MODE=api-key`:
+
+- `ANTHROPIC_API_KEY`
+
+If `AUTH_MODE=credentials`:
+
+- Mount `credentials.json` at `/secrets/credentials.json` or `$HOME/.claude/.credentials.json`.
+
+Optional:
+
+- `SLACK_WEBHOOK_URL` (Slack notifications)
+- `SQLITE_PATH` (default `/data/lucas.db`)
+
+### Dashboard
+
+- `SQLITE_PATH` (default `/data/lucas.db`)
+- `PORT` (default `8080`)
+- `LOG_PATH` (default `/data/lucas.log`)
+- `AUTH_USER` (default `a2wmin`)
+- `AUTH_PASS` (default `a2wssword`)
+
+## Deployment (interactive agent + dashboard)
+
+1. Create sealed secrets for `claude-auth` and `slack-bot`.
+2. Build and push images.
+3. Apply the manifests.
+
+Do not apply `k8s/secret.yaml` or `k8s/slack-bot-secret.yaml` in production. They are examples only.
+
+Apply the manifests explicitly:
+
+```bash
+kubectl apply -f k8s/namespace.yaml
+kubectl apply -f k8s/pvc.yaml
+kubectl apply -f k8s/rbac.yaml
+kubectl apply -f k8s/agent-deployment.yaml
+kubectl apply -f k8s/dashboard-deployment.yaml
+kubectl apply -f k8s/dashboard-service.yaml
+```
+
+Port-forward the dashboard:
+
+```bash
+kubectl -n a2w-lucas port-forward svc/dashboard 8080:80
+```
+
+Open `http://localhost:8080`.
+
+## CronJob mode
+
+Use `k8s/cronjob.yaml`. It runs a batch scan on a schedule and writes to SQLite. It can notify Slack via webhook.
+
+## Slack commands
+
+- `@lucas check pods in namespace xyz`
+- `@lucas why is pod abc crashing?`
+- `@lucas show recent errors`
+- `@lucas help`
 
 ## Dashboard
 
-Access the dashboard at `https://lucas.yourdomain.com` (or configured ingress).
+The dashboard shows recent runs, sessions, costs, and runbooks. Configure login with `AUTH_USER` and `AUTH_PASS`.
 
-**Pages:**
-- **Overview** - Recent runs, pod status, error counts
-- **Sessions** - Active Slack conversation sessions
-- **Costs** - Token usage and cost tracking per model
-- **Runbooks** - (Future) Custom remediation playbooks
+## Notes
 
-**Authentication:**
-Configure `AUTH_USER` and `AUTH_PASS` environment variables, or use defaults.
+- The helper script at `scripts/install.sh` can generate manifests and sealed secrets.
+- Docs live in `docs/` (VitePress).

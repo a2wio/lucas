@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: lucas-docs
+  namespace: a2w-lucas
+  labels:
+    app: lucas-docs
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: lucas-docs
+  template:
+    metadata:
+      labels:
+        app: lucas-docs
+    spec:
+      containers:
+        - name: docs
+          image: ghcr.io/a2wio/lucas-docs:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 80
+          resources:
+            requests:
+              memory: "32Mi"
+              cpu: "25m"
+            limits:
+              memory: "64Mi"
+              cpu: "100m"
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 5
+            periodSeconds: 5
