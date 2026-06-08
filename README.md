@@ -25,51 +25,41 @@ CronJob agent (`Dockerfile.lucas`):
 
 ### Interactive agent
 
-Required:
-
-- `ANTHROPIC_API_KEY`
-- `SLACK_BOT_TOKEN`
-- `SLACK_APP_TOKEN`
-
-Common:
-
-- `SRE_MODE` (`autonomous` or `watcher`)
-- `CLAUDE_MODEL` (`sonnet` or `opus`)
-- `TARGET_NAMESPACE`
-- `TARGET_NAMESPACES` (comma-separated)
-- `SRE_ALERT_CHANNEL` (enables scheduled scans)
-- `SCAN_INTERVAL_SECONDS`
-- `SQLITE_PATH` (default `/data/lucas.db`)
-- `PROMPT_FILE` (default `/app/master-prompt-interactive.md`)
+| Variable | Description | Default | Required |
+|---|---|---|---|
+| `ANTHROPIC_API_KEY` | Claude API key | - | Yes |
+| `SLACK_BOT_TOKEN` | Slack bot token (xoxb-...) | - | Yes |
+| `SLACK_APP_TOKEN` | Slack app token (xapp-...) | - | Yes |
+| `SRE_MODE` | `autonomous` or `watcher` | `autonomous` | No |
+| `CLAUDE_MODEL` | `sonnet` or `opus` | `sonnet` | No |
+| `TARGET_NAMESPACE` | Default namespace for interactive requests | `default` | No |
+| `TARGET_NAMESPACES` | Comma-separated namespaces for scheduled scans | `default` | No |
+| `SRE_ALERT_CHANNEL` | Channel ID for scheduled scan alerts | - | No |
+| `SCAN_INTERVAL_SECONDS` | Seconds between scheduled scans | `300` | No |
+| `SQLITE_PATH` | SQLite DB path | `/data/lucas.db` | No |
+| `PROMPT_FILE` | System prompt path | `/app/master-prompt-interactive.md` | No |
 
 ### CronJob agent
 
-Required:
-
-- `TARGET_NAMESPACE`
-- `SRE_MODE` (`autonomous` or `report`)
-- `AUTH_MODE` (`api-key` or `credentials`)
-
-If `AUTH_MODE=api-key`:
-
-- `ANTHROPIC_API_KEY`
-
-If `AUTH_MODE=credentials`:
-
-- Mount `credentials.json` at `/secrets/credentials.json` or `$HOME/.claude/.credentials.json`.
-
-Optional:
-
-- `SLACK_WEBHOOK_URL` (Slack notifications)
-- `SQLITE_PATH` (default `/data/lucas.db`)
+| Variable | Description | Default | Required |
+|---|---|---|---|
+| `TARGET_NAMESPACE` | Namespace to scan | `default` | Yes |
+| `SRE_MODE` | `autonomous` or `report` | `autonomous` | Yes |
+| `AUTH_MODE` | `api-key` or `credentials` | `api-key` | Yes |
+| `ANTHROPIC_API_KEY` | Claude API key (when `AUTH_MODE=api-key`) | - | Conditional |
+| `credentials.json` | Mount at `/secrets/credentials.json` or `$HOME/.claude/.credentials.json` when `AUTH_MODE=credentials` | - | Conditional |
+| `SLACK_WEBHOOK_URL` | Slack webhook notifications | - | No |
+| `SQLITE_PATH` | SQLite DB path | `/data/lucas.db` | No |
 
 ### Dashboard
 
-- `SQLITE_PATH` (default `/data/lucas.db`)
-- `PORT` (default `8080`)
-- `LOG_PATH` (default `/data/lucas.log`)
-- `AUTH_USER` (default `a2wmin`)
-- `AUTH_PASS` (default `a2wssword`)
+| Variable | Description | Default | Required |
+|---|---|---|---|
+| `SQLITE_PATH` | SQLite DB path | `/data/lucas.db` | No |
+| `PORT` | HTTP port | `8080` | No |
+| `LOG_PATH` | Log file path | `/data/lucas.log` | No |
+| `AUTH_USER` | Dashboard login user | `a2wmin` | No |
+| `AUTH_PASS` | Dashboard login password | `a2wssword` | No |
 
 ## Deployment (interactive agent + dashboard)
 
