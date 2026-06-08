@@ -1,8 +1,8 @@
 import { defineConfig } from 'vitepress'
 
 export default defineConfig({
-  // Hosted under https://docs.a2w.io/lucas/
-  base: '/lucas/',
+  // Hosted at https://docs.a2w.io/
+  base: '/',
   title: 'A2W: Lucas',
   description: 'Kubernetes-native agent for pod health checks and hotfixes.',
   lang: 'en-US',
